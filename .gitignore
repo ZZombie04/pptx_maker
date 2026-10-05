@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+examples/out/
+*_preview/
+*.pptx.tmp
+.spec.json

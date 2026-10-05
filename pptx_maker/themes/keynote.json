@@ -1,0 +1,14 @@
+{
+  "name": "keynote",
+  "label": "키노트 다크",
+  "mode": "dark",
+  "summary": "검정 바탕에 흰 글자, 포인트 색은 밝은 빛 색으로. 구획 표지는 사진 전면 + 어둡게 덮기. 제품 발표·기술 설명회·피치.",
+  "use_for": ["제품 발표", "기술 설명회", "투자 피치", "행사 키노트"],
+  "font": "Pretendard",
+  "neutrals": {"page": "0B0B0C", "panel": "161618", "panel2": "232326", "card": "1C1C1E", "ink": "F5F5F7", "body": "D2D2D7",
+               "muted": "A1A1A6", "faint": "6E6E73", "rule": "2C2C2E", "rule2": "3A3A3E",
+               "inv_bg": "F5F5F7", "inv_ink": "0B0B0C", "inv_muted": "6E6E73"},
+  "style": {"radius": 16, "panel": "fill", "section": "photo", "statement": "field", "numeral": "L", "title": "EB", "footer": "progress"},
+  "data": {"pre": "3D5BA9", "post": "7FA8FF", "ramp": ["2A3A63", "35529C", "4A72D6", "7FA8FF", "BFD3FF"], "grid": "2C2C2E", "axis": "3A3A3E"},
+  "default_accent": "blue"
+}

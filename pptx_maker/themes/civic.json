@@ -1,0 +1,51 @@
+{
+  "name": "civic",
+  "label": "시빅",
+  "mode": "light",
+  "summary": "차가운 회색 면과 남색 중심의 단정한 공공 문서형. 모서리 6, 굵은 숫자. 공공기관·교육청·행정 보고·사업 설명.",
+  "use_for": [
+    "공공기관 보고",
+    "사업 설명회",
+    "행정 연수",
+    "정책 브리핑"
+  ],
+  "font": "Pretendard",
+  "neutrals": {
+    "page": "FFFFFF",
+    "panel": "F2F4F7",
+    "panel2": "E6EAF0",
+    "card": "FFFFFF",
+    "ink": "131A26",
+    "body": "334155",
+    "muted": "5B6576",
+    "faint": "7F8A9E",
+    "rule": "E3E7ED",
+    "rule2": "CBD2DC",
+    "inv_bg": "121B4D",
+    "inv_ink": "FFFFFF",
+    "inv_muted": "9DAEF5"
+  },
+  "style": {
+    "radius": 6,
+    "panel": "fill",
+    "section": "field",
+    "statement": "inv",
+    "numeral": "B",
+    "title": "B",
+    "footer": "progress"
+  },
+  "data": {
+    "pre": "9DAEF5",
+    "post": "1F2F86",
+    "ramp": [
+      "C7D0F3",
+      "9DAEF5",
+      "6D84E6",
+      "2D44B8",
+      "1F2F86"
+    ],
+    "grid": "E3E7ED",
+    "axis": "CBD2DC"
+  },
+  "default_accent": "navy"
+}

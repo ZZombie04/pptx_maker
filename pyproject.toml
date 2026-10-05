@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pptx-maker"
+version = "1.0.0"
+description = "한국어에 강한 '사람이 만든 것 같은' 발표 자료(PPTX) 엔진 · CLI · MCP · Claude 스킬"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "ZZombie04" }]
+keywords = ["pptx", "powerpoint", "slides", "presentation", "korean", "한국어", "발표", "mcp", "skill"]
+dependencies = []
+
+[project.optional-dependencies]
+images = ["pillow>=9.0"]
+
+[project.scripts]
+pptx-maker = "pptx_maker.cli:main"
+pptx-maker-mcp = "pptx_maker.mcp_server:main"
+
+[project.urls]
+Homepage = "https://github.com/ZZombie04/pptx_maker"
+
+[tool.setuptools]
+packages = ["pptx_maker"]
+
+[tool.setuptools.package-data]
+pptx_maker = ["themes/*.json", "data/*.json", "data/*.md", "ps/*.ps1"]

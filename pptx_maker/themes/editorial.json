@@ -1,0 +1,52 @@
+{
+  "name": "editorial",
+  "label": "에디토리얼",
+  "mode": "light",
+  "summary": "흰 바탕·연회색 패널·검정 글자에 장마다 포인트 색 하나. 구획 표지는 포인트 색의 깊은 면 + 사진. 연수·정책·보고·교육 자료.",
+  "use_for": [
+    "연수",
+    "정책 설명",
+    "결과 보고",
+    "교육",
+    "기관 발표"
+  ],
+  "font": "Pretendard",
+  "neutrals": {
+    "page": "FFFFFF",
+    "panel": "F5F5F7",
+    "panel2": "EDEDF0",
+    "card": "FFFFFF",
+    "ink": "1D1D1F",
+    "body": "3A3A3C",
+    "muted": "6E6E73",
+    "faint": "8E8E93",
+    "rule": "E5E5EA",
+    "rule2": "D2D2D7",
+    "inv_bg": "0B0B0C",
+    "inv_ink": "FFFFFF",
+    "inv_muted": "A1A1A6"
+  },
+  "style": {
+    "radius": 12,
+    "panel": "fill",
+    "section": "field",
+    "statement": "inv",
+    "numeral": "L",
+    "title": "EB",
+    "footer": "progress"
+  },
+  "data": {
+    "pre": "86A9F5",
+    "post": "0A5CFF",
+    "ramp": [
+      "8EAEF6",
+      "5F8DF8",
+      "2E6CFC",
+      "0A4FD8",
+      "083A9E"
+    ],
+    "grid": "E5E5EA",
+    "axis": "C7C7CC"
+  },
+  "default_accent": "blue"
+}
