@@ -1,0 +1,92 @@
+{
+ "name": "magazine",
+ "order": 10,
+ "label": "매거진",
+ "mode": "light",
+ "summary": "굵은 명조 제목과 가는 고딕 본문, 큰 세리프 숫자, 사진 전면 표지와 큰따옴표. 브랜드 이야기·인문·문화·여행·기획 기사형 발표.",
+ "use_for": [
+  "브랜드 스토리",
+  "문화·인문 강연",
+  "여행·라이프",
+  "기획 기사형 발표"
+ ],
+ "fonts": {
+  "body": "Pretendard",
+  "head": "NanumMyeongjo",
+  "display": "NanumMyeongjo",
+  "num": "NanumMyeongjo",
+  "latin": {
+   "num": "DM Serif Display"
+  },
+  "weights": {
+   "H": "EB",
+   "D": "EB",
+   "N": "R"
+  }
+ },
+ "tracking": {
+  "H": -0.02,
+  "D": -0.03,
+  "N": -0.02
+ },
+ "neutrals": {
+  "page": "FFFFFF",
+  "panel": "F4F4F2",
+  "panel2": "E8E8E5",
+  "card": "FFFFFF",
+  "ink": "141414",
+  "body": "333333",
+  "muted": "666666",
+  "faint": "7A7A7A",
+  "rule": "E3E3E0",
+  "rule2": "141414",
+  "inv_bg": "141414",
+  "inv_ink": "FFFFFF",
+  "inv_muted": "A6A6A6"
+ },
+ "style": {
+  "radius": 0,
+  "panel": "rule",
+  "section": "split",
+  "cover": "magazine",
+  "statement": "serif",
+  "header": "serif",
+  "footer": "plain",
+  "numeral": "R",
+  "title": "EB",
+  "title_size": 32,
+  "decor": "none",
+  "bullet": "—",
+  "card": "top",
+  "closing": "magazine",
+  "quote_mark": true
+ },
+ "data": {
+  "pre": "B7B7B2",
+  "post": "002FA7",
+  "ramp": [
+   "D6DCF0",
+   "9AAADF",
+   "5E78CF",
+   "002FA7",
+   "001F6E"
+  ],
+  "grid": "E3E3E0",
+  "axis": "B7B7B2",
+  "series": [
+   "002FA7",
+   "7A1F1F",
+   "2F7D5B",
+   "B7B7B2",
+   "141414"
+  ]
+ },
+ "default_accent": "klein",
+ "section_accents": [
+  "klein",
+  "oxblood",
+  "forest",
+  "plum"
+ ],
+ "motion": "subtle"
+}

@@ -1,0 +1,90 @@
+{
+ "name": "studio",
+ "order": 2,
+ "label": "스튜디오(연수·강의)",
+ "mode": "light",
+ "summary": "발표용으로 만든 글꼴(프리젠테이션), 옅은 회색 바탕에 흰 판, 청록 하나, 실습 장은 어두운 판. 번호 단계·QR. 교사 연수·직무 교육·워크숍·강의.",
+ "use_for": [
+  "교사 연수",
+  "직무 교육",
+  "워크숍",
+  "온라인 강의",
+  "세미나"
+ ],
+ "fonts": {
+  "body": "Freesentation",
+  "weights": {
+   "H": "B",
+   "D": "EB",
+   "N": "SB"
+  }
+ },
+ "tracking": {
+  "H": -0.02,
+  "D": -0.03,
+  "N": -0.03
+ },
+ "neutrals": {
+  "page": "F5F6F7",
+  "panel": "FFFFFF",
+  "panel2": "E9ECEF",
+  "card": "FFFFFF",
+  "ink": "18212B",
+  "body": "2F3A45",
+  "muted": "5B6875",
+  "faint": "76828F",
+  "rule": "E1E5E9",
+  "rule2": "C7CED5",
+  "inv_bg": "18212B",
+  "inv_ink": "FFFFFF",
+  "inv_muted": "A9B4BF"
+ },
+ "style": {
+  "radius": 14,
+  "panel": "fill",
+  "section": "field",
+  "cover": "studio",
+  "statement": "inv",
+  "header": "pill",
+  "footer": "progress",
+  "numeral": "SB",
+  "title": "B",
+  "title_size": 30,
+  "decor": "none",
+  "bullet": "•",
+  "card": "fill",
+  "closing": "studio"
+ },
+ "data": {
+  "pre": "9FD6D5",
+  "post": "0E7C7B",
+  "ramp": [
+   "CFEBEA",
+   "9FD6D5",
+   "57B5B3",
+   "0E7C7B",
+   "095857"
+  ],
+  "grid": "E1E5E9",
+  "axis": "C7CED5",
+  "series": [
+   "0E7C7B",
+   "F2B705",
+   "1F4FD1",
+   "D3263E",
+   "76828F"
+  ]
+ },
+ "accents": {
+  "workshop": "0E7C7B"
+ },
+ "default_accent": "workshop",
+ "section_accents": [
+  "workshop",
+  "navy",
+  "amber",
+  "crimson",
+  "forest"
+ ],
+ "motion": "build"
+}

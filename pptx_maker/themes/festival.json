@@ -1,0 +1,106 @@
+{
+ "name": "festival",
+ "order": 13,
+ "label": "축제·행사",
+ "mode": "light",
+ "summary": "아주 굵은 제목(검은고딕)과 좁고 높은 숫자, 큰 색 면과 동그라미·반원 도형, 시간표·장소를 크게. 축제·체육대회·공연·행사 안내.",
+ "use_for": [
+  "축제",
+  "체육대회",
+  "공연·행사 안내",
+  "캠페인",
+  "페스티벌"
+ ],
+ "fonts": {
+  "body": "Pretendard",
+  "head": "Black Han Sans",
+  "display": "Black Han Sans",
+  "num": "Black Han Sans",
+  "latin": {
+   "num": "Bebas Neue"
+  },
+  "weights": {
+   "H": "R",
+   "D": "R",
+   "N": "R"
+  }
+ },
+ "tracking": {
+  "H": -0.01,
+  "D": -0.02,
+  "N": 0
+ },
+ "neutrals": {
+  "page": "FFFFFF",
+  "panel": "F2F2F2",
+  "panel2": "E6E6E6",
+  "card": "FFFFFF",
+  "ink": "141414",
+  "body": "2A2A2A",
+  "muted": "5E5E5E",
+  "faint": "767676",
+  "rule": "E6E6E6",
+  "rule2": "141414",
+  "inv_bg": "141414",
+  "inv_ink": "FFFFFF",
+  "inv_muted": "A6A6A6",
+  "ink_dark": "141414"
+ },
+ "style": {
+  "radius": 6,
+  "panel": "fill",
+  "section": "band",
+  "cover": "festival",
+  "statement": "accent",
+  "statement_size": 46,
+  "header": "bar",
+  "footer": "plain",
+  "numeral": "R",
+  "title": "R",
+  "title_size": 34,
+  "decor": "shapes",
+  "bullet": "■",
+  "card": "fill",
+  "closing": "festival",
+  "body_scale": 1.05
+ },
+ "data": {
+  "pre": "BFCFFF",
+  "post": "0050FF",
+  "ramp": [
+   "CCD9FF",
+   "99B3FF",
+   "4D7DFF",
+   "0050FF",
+   "0038B3"
+  ],
+  "grid": "E6E6E6",
+  "axis": "BFBFBF",
+  "series": [
+   "0050FF",
+   "FF3D2E",
+   "FFD400",
+   "12B886",
+   "141414"
+  ]
+ },
+ "accents": {
+  "fcobalt": "0050FF",
+  "sun": {
+   "base": "FFD400",
+   "deep": "7A6500",
+   "soft": "FFF2B3",
+   "wash": "FFFAE0",
+   "glow": "FFE14D",
+   "field": "4D3F00"
+  }
+ },
+ "default_accent": "fcobalt",
+ "section_accents": [
+  "fcobalt",
+  "tomato",
+  "sun",
+  "mint"
+ ],
+ "motion": "dynamic"
+}

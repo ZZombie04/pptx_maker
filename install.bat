@@ -3,7 +3,7 @@ setlocal
 chcp 65001 >nul
 title pptx_maker 설치
 echo ==========================================
-echo   pptx_maker 연결 (Windows)
+echo   pptx_maker 2.0 연결 (Windows)
 echo ==========================================
 set "PY="
 for %%C in ("py -3" "python" "python3") do (
@@ -24,7 +24,13 @@ set "PYTHONPATH=%~dp0"
 )
 %PY% -m pptx_maker doctor
 echo.
-%PY% -m pptx_maker setup
+set /p FON="테마 글꼴 22종(무료)을 이 PC 에 설치할까요? 발표 화면이 설계와 같아집니다. [Y/n] "
+if /i "%FON%"=="n" (
+  %PY% -m pptx_maker setup
+) else (
+  %PY% -m pptx_maker setup --fonts
+)
 echo.
-echo 끝났습니다. AI 프로그램(Claude Code 등)을 다시 시작하면 pptx_maker 도구와 스킬이 보입니다.
+echo 끝났습니다. AI 프로그램(Claude Code·Codex·Gemini 등)을 다시 시작하면 pptx_maker 도구와 스킬이 보입니다.
+echo 홍보 페이지: https://zzombie04.github.io/pptx_maker/
 pause

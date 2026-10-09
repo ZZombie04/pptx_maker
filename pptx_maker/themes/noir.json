@@ -1,0 +1,89 @@
+{
+ "name": "noir",
+ "order": 17,
+ "label": "누아르(의전·시상식)",
+ "mode": "dark",
+ "summary": "먹색 바탕, 샴페인 골드 하나, 붓맛 명조 표지와 가운데 정렬, 금색 가는 선 액자. 시상식·졸업식·의전·고급 브랜드·기념 행사.",
+ "use_for": [
+  "시상식",
+  "졸업식·입학식",
+  "의전·기념식",
+  "고급 브랜드",
+  "VIP 행사"
+ ],
+ "fonts": {
+  "body": "Pretendard",
+  "head": "NanumMyeongjo",
+  "display": "Song Myung",
+  "num": "NanumMyeongjo",
+  "latin": {
+   "num": "DM Serif Display"
+  },
+  "weights": {
+   "H": "B",
+   "D": "R",
+   "N": "R"
+  }
+ },
+ "tracking": {
+  "H": 0,
+  "D": 0,
+  "N": 0
+ },
+ "neutrals": {
+  "page": "0B0B0C",
+  "panel": "161514",
+  "panel2": "1F1D1A",
+  "card": "141312",
+  "ink": "F5F3EE",
+  "body": "D6D2C8",
+  "muted": "A39E92",
+  "faint": "8C877D",
+  "rule": "2A2824",
+  "rule2": "4A4436",
+  "inv_bg": "F5F3EE",
+  "inv_ink": "0B0B0C",
+  "inv_muted": "6E6A60"
+ },
+ "style": {
+  "radius": 0,
+  "panel": "outline",
+  "section": "center",
+  "cover": "ceremony",
+  "statement": "serif",
+  "header": "center",
+  "footer": "none",
+  "numeral": "R",
+  "title": "B",
+  "title_size": 32,
+  "decor": "frame",
+  "bullet": "—",
+  "card": "outline",
+  "closing": "ceremony"
+ },
+ "data": {
+  "pre": "5A5244",
+  "post": "C9A45C",
+  "ramp": [
+   "3A3429",
+   "5A5244",
+   "8C7A52",
+   "C9A45C",
+   "E8D7A9"
+  ],
+  "grid": "2A2824",
+  "axis": "4A4436",
+  "series": [
+   "C9A45C",
+   "E8D7A9",
+   "8C877D",
+   "6E7F8C",
+   "F5F3EE"
+  ]
+ },
+ "default_accent": "gold",
+ "section_accents": [
+  "gold"
+ ],
+ "motion": "subtle"
+}

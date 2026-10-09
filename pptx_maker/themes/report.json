@@ -1,0 +1,91 @@
+{
+ "name": "report",
+ "order": 4,
+ "label": "리포트(대시보드)",
+ "mode": "light",
+ "summary": "연회색 바탕 위 흰 카드, 숫자가 단정한 글꼴, 지표·추세·목표 대비. 상태 색(초록·빨강)은 상태에만. 성과 보고·데이터 보고·주간 보고.",
+ "use_for": [
+  "성과 보고",
+  "데이터 보고",
+  "주간·월간 보고",
+  "KPI 점검"
+ ],
+ "fonts": {
+  "body": "SUIT",
+  "weights": {
+   "H": "B",
+   "D": "EB",
+   "N": "M"
+  }
+ },
+ "tracking": {
+  "H": -0.02,
+  "D": -0.03,
+  "N": -0.02
+ },
+ "neutrals": {
+  "page": "F7F8FA",
+  "panel": "FFFFFF",
+  "panel2": "EEF0F3",
+  "card": "FFFFFF",
+  "ink": "141A22",
+  "body": "2E3640",
+  "muted": "5E6874",
+  "faint": "77818C",
+  "rule": "E3E7EC",
+  "rule2": "CDD3DA",
+  "inv_bg": "141A22",
+  "inv_ink": "FFFFFF",
+  "inv_muted": "9AA4B0"
+ },
+ "style": {
+  "radius": 10,
+  "panel": "fill",
+  "section": "white",
+  "cover": "type",
+  "statement": "inv",
+  "header": "rule",
+  "footer": "page",
+  "numeral": "M",
+  "title": "B",
+  "title_size": 26,
+  "decor": "none",
+  "bullet": "•",
+  "card": "fill",
+  "closing": "type",
+  "body_scale": 0.95
+ },
+ "data": {
+  "pre": "B8C0CA",
+  "post": "2856E8",
+  "ramp": [
+   "DCE3FB",
+   "A8B9F4",
+   "6C8BEE",
+   "2856E8",
+   "1A3BA8"
+  ],
+  "grid": "E3E7EC",
+  "axis": "CDD3DA",
+  "series": [
+   "2856E8",
+   "1A9E6E",
+   "F2A900",
+   "D64545",
+   "B8C0CA"
+  ],
+  "pos": "1A9E6E",
+  "neg": "D64545"
+ },
+ "accents": {
+  "dash": "2856E8"
+ },
+ "default_accent": "dash",
+ "section_accents": [
+  "dash",
+  "teal",
+  "amber",
+  "crimson"
+ ],
+ "motion": "subtle"
+}

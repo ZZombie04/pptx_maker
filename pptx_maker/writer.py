@@ -3,6 +3,7 @@
 
 입력은 Deck.to_dict() 결과(색은 16진수, 글꼴 이름 확정). 글상자는 textfit 으로 어절 단위 줄을 미리 나눠
 <a:br/> 로 넣으므로 PowerPoint 가 한글 낱말을 가운데서 자르지 않는다. 넘치면 글자를 5%씩 줄이고 경고를 남긴다.
+화면 전환·나타나기 애니메이션(motion.py), 아이콘(벡터 경로), 사진 색조(흑백·이중톤), 하이퍼링크, 글꼴 내장(선택)을 쓴다.
 """
 from __future__ import annotations
 
@@ -14,6 +15,7 @@ import zipfile
 from xml.sax.saxutils import escape
 
 from . import images as _img
+from . import motion as _motion
 from . import textfit
 
 EMU = 12700
@@ -26,6 +28,7 @@ CT = {
     "notes": "application/vnd.openxmlformats-officedocument.presentationml.notesSlide+xml",
 }
 _BAD = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f￾￿]")
+LATIN_ONLY = set()          # 한글이 없는 글꼴(라틴 전용) — 한글은 ea 글꼴로 넘긴다
 
 
 def E(v):
@@ -41,14 +44,23 @@ def A(s):
 
 
 # ---------------------------------------------------------------- 채움·선
-def solid(hexv, alpha=0):
-    if not hexv:
-        return "<a:noFill/>"
+def _clr(hexv, alpha=0):
     a = f'<a:alpha val="{int(round((1 - float(alpha)) * 100000))}"/>' if alpha else ""
-    return f'<a:solidFill><a:srgbClr val="{hexv}">{a}</a:srgbClr></a:solidFill>'
+    return f'<a:srgbClr val="{hexv}">{a}</a:srgbClr>'
 
 
-def line_xml(color, lw=0.75, dash=None, arrow=None):
+def solid(fill, alpha=0):
+    """채움: None · 'RRGGBB' · {'grad': [(위치 0~1, 'RRGGBB', 투명도 0~1)…], 'angle': 도}"""
+    if not fill:
+        return "<a:noFill/>"
+    if isinstance(fill, dict) and fill.get("grad"):
+        stops = "".join(f'<a:gs pos="{int(round(float(p) * 100000))}">{_clr(c, a)}</a:gs>' for p, c, a in fill["grad"])
+        ang = int(round(float(fill.get("angle", 90)) * 60000)) % 21600000
+        return f'<a:gradFill rotWithShape="1"><a:gsLst>{stops}</a:gsLst><a:lin ang="{ang}" scaled="0"/></a:gradFill>'
+    return f'<a:solidFill>{_clr(fill, alpha)}</a:solidFill>'
+
+
+def line_xml(color, lw=0.75, dash=None, arrow=None, cap=None, alpha=0):
     if not color:
         return "<a:ln><a:noFill/></a:ln>"
     d = ""
@@ -56,12 +68,16 @@ def line_xml(color, lw=0.75, dash=None, arrow=None):
         d = '<a:prstDash val="dash"/>'
     elif dash == "dot":
         d = '<a:prstDash val="sysDot"/>'
+    elif dash == "lgdash":
+        d = '<a:prstDash val="lgDash"/>'
     ends = ""
     if arrow in ("begin", "both"):
         ends += '<a:headEnd type="triangle" w="med" len="med"/>'
     if arrow in ("end", "both"):
         ends += '<a:tailEnd type="triangle" w="med" len="med"/>'
-    return f'<a:ln w="{E(lw)}">{solid(color)}{d}{ends}</a:ln>'
+    join = "<a:round/>" if cap == "rnd" else ""
+    capat = f' cap="{cap}"' if cap else ""
+    return f'<a:ln w="{E(lw)}"{capat}>{solid(color, alpha)}{d}{join}{ends}</a:ln>'
 
 
 def shadow_xml(on, strong=False):
@@ -72,14 +88,22 @@ def shadow_xml(on, strong=False):
         d=E(4 if strong else 3), a=16000 if strong else 14000)
 
 
-def geom(r, w, h):
+PRST = {"rect", "roundRect", "ellipse", "triangle", "rtTriangle", "diamond", "pentagon", "hexagon", "octagon", "chevron",
+        "homePlate", "parallelogram", "trapezoid", "blockArc", "arc", "pie", "chord", "donut", "star5", "plus", "round2SameRect",
+        "snip1Rect", "flowChartTerminator", "wedgeRectCallout", "rightArrow", "leftArrow", "upArrow", "downArrow", "can"}
+
+
+def geom(r, w, h, shape=None, adj=None):
+    if shape and shape not in ("rect", "roundRect") and shape in PRST:
+        av = "".join(f'<a:gd name="{k}" fmla="val {int(v)}"/>' for k, v in (adj or {}).items())
+        return f'<a:prstGeom prst="{shape}"><a:avLst>{av}</a:avLst></a:prstGeom>'
     if r and float(r) > 0:
         m = min(float(w), float(h))
-        adj = float(r)
-        if adj > 0.5:
-            adj = adj / m
-        adj = min(adj, 0.5)
-        return f'<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val {int(round(adj * 100000))}"/></a:avLst></a:prstGeom>'
+        a = float(r)
+        if a > 0.5:
+            a = a / m
+        a = min(a, 0.5)
+        return f'<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val {int(round(a * 100000))}"/></a:avLst></a:prstGeom>'
     return '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>'
 
 
@@ -95,21 +119,23 @@ def xfrm(x, y, w, h, rot=0, flipH=False, flipV=False):
 
 
 # ---------------------------------------------------------------- 글자
-def rpr(r, lang, tag="a:rPr"):
+def rpr(r, lang, tag="a:rPr", link_rid=None):
     font = r.get("font") or "Pretendard"
-    ea = "Malgun Gothic" if font == "Consolas" else font
+    ea = r.get("ea") or ("Malgun Gothic" if (font == "Consolas" or font in LATIN_ONLY) else font)
     at = f' lang="{lang}" altLang="en-US" sz="{int(round(float(r["size"]) * 100))}"'
-    if r.get("bold"):
-        at += ' b="1"'
-    else:
-        at += ' b="0"'
+    at += ' b="1"' if r.get("bold") else ' b="0"'
     if r.get("italic"):
         at += ' i="1"'
     if r.get("u"):
         at += ' u="sng"'
+    if r.get("trk"):
+        at += f' spc="{int(round(float(r["trk"]) * float(r["size"]) * 100))}"'
     at += ' dirty="0"'
+    hl = (f'<a:hlinkClick r:id="{link_rid}"><a:extLst><a:ext uri="{{A12FA001-AC4F-418D-AE19-62706E023703}}">'
+          f'<ahyp:hlinkClr xmlns:ahyp="http://schemas.microsoft.com/office/drawing/2018/hyperlinkcolor" val="tx"/></a:ext></a:extLst>'
+          f'</a:hlinkClick>') if link_rid else ""
     return (f'<{tag}{at}>{solid(r.get("color") or "000000")}'
-            f'<a:latin typeface="{A(font)}"/><a:ea typeface="{A(ea)}"/><a:cs typeface="{A(font)}"/></{tag}>')
+            f'<a:latin typeface="{A(font)}"/><a:ea typeface="{A(ea)}"/><a:cs typeface="{A(font)}"/>{hl}</{tag}>')
 
 
 def ppr(p):
@@ -120,23 +146,31 @@ def ppr(p):
         ind = float(p.get("indent") or 14)
         at = f' marL="{E(ind)}" indent="{-E(ind)}"' + at
         b = p["bullet"]
+        ch = b.get("ch", "•")
+        bfont = "Arial" if ch in "•–-" else (b.get("font") or "Malgun Gothic")
         bu = (f'<a:buClr><a:srgbClr val="{b.get("color") or "A1A1A6"}"/></a:buClr>'
               f'<a:buSzPct val="{int(round(float(b.get("rel", 1.0)) * 100000))}"/>'
-              f'<a:buFont typeface="Arial"/><a:buChar char="{A(b.get("ch", "•"))}"/>')
+              f'<a:buFont typeface="{A(bfont)}"/><a:buChar char="{A(ch)}"/>')
     elif p.get("indent"):
         at = f' marL="{E(p["indent"])}" indent="0"' + at
     lh = float(p.get("lh") or 1.0)
     sb, sa = float(p.get("sb") or 0), float(p.get("sa") or 0)
-    return (f'<a:pPr{at}><a:lnSpc><a:spcPct val="{int(round(lh * 100000))}"/></a:lnSpc>'
+    if p.get("lh_pts"):
+        ln = f'<a:spcPts val="{int(round(float(p["lh_pts"]) * 100))}"/>'
+    else:
+        ln = f'<a:spcPct val="{int(round(lh * 100000))}"/>'
+    return (f'<a:pPr{at}><a:lnSpc>{ln}</a:lnSpc>'
             f'<a:spcBef><a:spcPts val="{int(round(sb * 100))}"/></a:spcBef>'
             f'<a:spcAft><a:spcPts val="{int(round(sa * 100))}"/></a:spcAft>{bu}</a:pPr>')
 
 
-def para_xml(p, inner_w, lang):
+def para_xml(p, inner_w, lang, link=None):
+    """link: 주소 → rId 를 돌려주는 함수(런에 link 가 있을 때)."""
     lines, chars = textfit.break_lines(p, inner_w)
     out = [ppr(p)]
     runs = p["runs"]
     last_r = runs[-1] if runs else {"size": 12, "font": "Pretendard", "color": "000000"}
+    rids = {i: (link(r["link"]) if (link and r.get("link")) else None) for i, r in enumerate(runs)}
     for li, (s, e, _w, _) in enumerate(lines):
         if li > 0:
             ri = chars[s - 1][1] if s > 0 and s - 1 < len(chars) else (chars[s][1] if s < len(chars) else len(runs) - 1)
@@ -149,7 +183,7 @@ def para_xml(p, inner_w, lang):
                 j += 1
             txt = "".join(c[0] for c in chars[k:j])
             sp = ' xml:space="preserve"' if (txt[:1] == " " or txt[-1:] == " ") else ""
-            out.append(f'<a:r>{rpr(runs[ri], lang)}<a:t{sp}>{X(txt)}</a:t></a:r>')
+            out.append(f'<a:r>{rpr(runs[ri], lang, link_rid=rids.get(ri))}<a:t{sp}>{X(txt)}</a:t></a:r>')
             k = j
     out.append(rpr(last_r, lang, "a:endParaRPr"))
     return f'<a:p>{"".join(out)}</a:p>'
@@ -177,76 +211,119 @@ def fit_text(sh, warn, sid):
 
 
 # ---------------------------------------------------------------- 도형 XML
+def _blip_fx(tone):
+    """사진 색조: 'mono'(흑백) · ('duo', 어두운 색, 밝은 색) · ('tint', 색, 세기 0~1)"""
+    if not tone:
+        return ""
+    if tone == "mono":
+        return "<a:grayscl/>"
+    if isinstance(tone, (list, tuple)) and tone[0] == "duo":
+        return f'<a:duotone><a:srgbClr val="{tone[1]}"/><a:srgbClr val="{tone[2]}"/></a:duotone>'
+    if isinstance(tone, (list, tuple)) and tone[0] == "dim":
+        return f'<a:lum bright="{int(-float(tone[1]) * 100000)}"/>'
+    return ""
+
+
 class SlideBuilder:
     def __init__(self, lang, media):
         self.id = 1
-        self.rels = []        # (rId, type, target)
+        self.rels = []        # (rId, type, target[, mode])
         self.parts = []
         self.lang = lang
         self.media = media    # Media
+        self.spids = {}       # 도형 번호 → spid
+        self.text_ids = set()
+        self._links = {}
 
     def nid(self):
         self.id += 1
         return self.id
 
-    def rel(self, typ, target):
+    def rel(self, typ, target, external=False):
         rid = f"rId{len(self.rels) + 2}"   # rId1 = 레이아웃
-        self.rels.append((rid, typ, target))
+        self.rels.append((rid, typ, target, "External" if external else None))
         return rid
 
-    def sp_box(self, s, warn, sid):
+    def link(self, url):
+        from urllib.parse import quote
+        url = quote(url, safe=":/?#[]@!$&'()*+,;=%~")
+        if url not in self._links:
+            self._links[url] = self.rel(R_NS + "/hyperlink", url, external=True)
+        return self._links[url]
+
+    def _name(self, s, i, default):
+        return A(s.get("name") or f"{default} {i}")
+
+    def sp_box(self, s, warn, sid, idx=None):
         i = self.nid()
-        boxed = bool(s.get("fill") or s.get("line") or (s.get("r") and float(s["r"]) > 0))
-        nm = A(s.get("name") or (f"Text {i}" if s["k"] == "text" else f"Shape {i}"))
+        if idx is not None:
+            self.spids[idx] = i
+        boxed = bool(s.get("fill") or s.get("line") or (s.get("r") and float(s["r"]) > 0) or s.get("shape"))
+        nm = self._name(s, i, "Text" if s["k"] == "text" else "Shape")
         txbox = ' txBox="1"' if (s["k"] == "text" and not boxed) else ""
-        nv = f'<p:nvSpPr><p:cNvPr id="{i}" name="{nm}"/><p:cNvSpPr{txbox}/><p:nvPr/></p:nvSpPr>'
+        click = ""
+        if s.get("link"):
+            click = f'<a:hlinkClick r:id="{self.link(s["link"])}"/>'
+        nv = f'<p:nvSpPr><p:cNvPr id="{i}" name="{nm}">{click}</p:cNvPr><p:cNvSpPr{txbox}/><p:nvPr/></p:nvSpPr>'
         if s["k"] == "oval":
             g = '<a:prstGeom prst="ellipse"><a:avLst/></a:prstGeom>'
         else:
-            g = geom(s.get("r"), s["w"], s["h"])
-        sp = (f'<p:spPr>{xfrm(s["x"], s["y"], s["w"], s["h"], s.get("rot") or 0)}{g}'
+            g = geom(s.get("r"), s["w"], s["h"], s.get("shape"), s.get("adj"))
+        sp = (f'<p:spPr>{xfrm(s["x"], s["y"], s["w"], s["h"], s.get("rot") or 0, s.get("flipH"), s.get("flipV"))}{g}'
               f'{solid(s.get("fill"), s.get("alpha") or 0)}{line_xml(s.get("line"), s.get("lw") or 0.75, s.get("dash"))}'
               f'{shadow_xml(s.get("shadow"))}</p:spPr>')
         body = ""
         if s["k"] == "text":
+            self.text_ids.add(i)
             ps, iw = fit_text(s, warn, sid)
             m = s.get("margin") or [0, 0, 0, 0]
             anc = {"t": "t", "m": "ctr", "b": "b"}.get(s.get("anchor", "t"), "t")
-            bp = (f'<a:bodyPr rot="0" spcFirstLastPara="0" vertOverflow="overflow" horzOverflow="overflow" vert="horz" wrap="square" '
+            vert = ' vert="vert270"' if s.get("vert") == "up" else (' vert="vert"' if s.get("vert") == "down" else ' vert="horz"')
+            bp = (f'<a:bodyPr rot="0" spcFirstLastPara="0" vertOverflow="overflow" horzOverflow="overflow"{vert} wrap="square" '
                   f'lIns="{E(m[0])}" tIns="{E(m[1])}" rIns="{E(m[2])}" bIns="{E(m[3])}" numCol="1" spcCol="0" rtlCol="0" '
                   f'anchor="{anc}" anchorCtr="0"><a:prstTxWarp prst="textNoShape"><a:avLst/></a:prstTxWarp><a:noAutofit/></a:bodyPr>')
-            paras = "".join(para_xml(p, iw, self.lang) for p in ps) or '<a:p><a:endParaRPr lang="ko-KR" dirty="0"/></a:p>'
+            paras = "".join(para_xml(p, iw, self.lang, self.link) for p in ps) or '<a:p><a:endParaRPr lang="ko-KR" dirty="0"/></a:p>'
             body = f'<p:txBody>{bp}<a:lstStyle/>{paras}</p:txBody>'
         self.parts.append(f'<p:sp>{nv}{sp}{body}</p:sp>')
 
-    def pic(self, s, cache_dir):
+    def pic(self, s, cache_dir, idx=None):
         i = self.nid()
+        if idx is not None:
+            self.spids[idx] = i
         prep = _img.prepare(s["src"], s["w"], s["h"], s.get("focus") or (0.5, 0.5), s.get("region"), cache_dir)
         target = self.media.add(prep["path"])
-        rid = self.rel("http://schemas.openxmlformats.org/officeDocument/2006/relationships/image", f"../media/{target}")
+        rid = self.rel(R_NS + "/image", f"../media/{target}")
         crop = ""
         if prep["crop"]:
             l, t, r, b = prep["crop"]
             crop = f'<a:srcRect l="{int(l * 100000)}" t="{int(t * 100000)}" r="{int(r * 100000)}" b="{int(b * 100000)}"/>'
-        alpha = f'<a:alphaModFix amt="{int((1 - float(s["alpha"])) * 100000)}"/>' if s.get("alpha") else ""
+        fx = _blip_fx(s.get("tone"))
+        if s.get("alpha"):
+            fx += f'<a:alphaModFix amt="{int((1 - float(s["alpha"])) * 100000)}"/>'
+        nm = self._name(s, i, "Picture")
         self.parts.append(
-            f'<p:pic><p:nvPicPr><p:cNvPr id="{i}" name="Picture {i}" descr="{A(os.path.basename(s["src"]))}"/>'
+            f'<p:pic><p:nvPicPr><p:cNvPr id="{i}" name="{nm}" descr="{A(s.get("alt") or os.path.basename(s["src"]))}"/>'
             f'<p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr>'
-            f'<p:blipFill><a:blip r:embed="{rid}">{alpha}</a:blip>{crop}<a:stretch><a:fillRect/></a:stretch></p:blipFill>'
-            f'<p:spPr>{xfrm(s["x"], s["y"], s["w"], s["h"])}{geom(s.get("r"), s["w"], s["h"])}'
-            f'{line_xml(s.get("line"), 0.75) if s.get("line") else "<a:ln><a:noFill/></a:ln>"}{shadow_xml(s.get("shadow"), True)}</p:spPr></p:pic>')
+            f'<p:blipFill><a:blip r:embed="{rid}">{fx}</a:blip>{crop}<a:stretch><a:fillRect/></a:stretch></p:blipFill>'
+            f'<p:spPr>{xfrm(s["x"], s["y"], s["w"], s["h"])}{geom(s.get("r"), s["w"], s["h"], s.get("shape"))}'
+            f'{line_xml(s.get("line"), s.get("lw") or 0.75) if s.get("line") else "<a:ln><a:noFill/></a:ln>"}{shadow_xml(s.get("shadow"), True)}</p:spPr></p:pic>')
 
-    def cxn(self, s):
+    def cxn(self, s, idx=None):
         i = self.nid()
+        if idx is not None:
+            self.spids[idx] = i
         x1, y1, x2, y2 = (float(s[k]) for k in ("x1", "y1", "x2", "y2"))
         x, y, w, h = min(x1, x2), min(y1, y2), abs(x2 - x1), abs(y2 - y1)
+        nm = self._name(s, i, "Line")
         self.parts.append(
-            f'<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="{i}" name="Line {i}"/><p:cNvCxnSpPr/><p:nvPr/></p:nvCxnSpPr>'
+            f'<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="{i}" name="{nm}"/><p:cNvCxnSpPr/><p:nvPr/></p:nvCxnSpPr>'
             f'<p:spPr>{xfrm(x, y, w, h, 0, x2 < x1, y2 < y1)}<a:prstGeom prst="line"><a:avLst/></a:prstGeom>'
-            f'{line_xml(s.get("color") or "000000", s.get("lw") or 1.0, s.get("dash"), s.get("arrow"))}</p:spPr></p:cxnSp>')
+            f'{line_xml(s.get("color") or "000000", s.get("lw") or 1.0, s.get("dash"), s.get("arrow"), s.get("cap"), s.get("alpha") or 0)}</p:spPr></p:cxnSp>')
 
-    def poly(self, s):
+    def poly(self, s, idx=None):
         i = self.nid()
+        if idx is not None:
+            self.spids[idx] = i
         pts = s["pts"]
         xs, ys = [p[0] for p in pts], [p[1] for p in pts]
         x0, y0 = min(xs), min(ys)
@@ -258,10 +335,49 @@ class SlideBuilder:
             path += "<a:close/>"
         g = (f'<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/><a:rect l="0" t="0" r="r" b="b"/>'
              f'<a:pathLst><a:path w="{cw}" h="{ch}">{path}</a:path></a:pathLst></a:custGeom>')
+        nm = self._name(s, i, "Freeform")
         self.parts.append(
-            f'<p:sp><p:nvSpPr><p:cNvPr id="{i}" name="Freeform {i}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>'
+            f'<p:sp><p:nvSpPr><p:cNvPr id="{i}" name="{nm}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>'
             f'<p:spPr><a:xfrm><a:off x="{E(x0)}" y="{E(y0)}"/><a:ext cx="{cw}" cy="{ch}"/></a:xfrm>{g}'
-            f'{solid(s.get("fill"), s.get("alpha") or 0)}{line_xml(s.get("line"), s.get("lw") or 1.0)}</p:spPr></p:sp>')
+            f'{solid(s.get("fill"), s.get("alpha") or 0)}{line_xml(s.get("line"), s.get("lw") or 1.0, s.get("dash"), None, s.get("cap"))}</p:spPr></p:sp>')
+
+    def path(self, s, idx=None):
+        """벡터 경로(아이콘 등): s['paths'] = [{'cmds': [('M',x,y),('L',x,y),('C',x1,y1,x2,y2,x,y),('Z',)], 'fill': bool, 'stroke': bool}],
+        좌표는 s['vw']×s['vh'] 상자 기준."""
+        i = self.nid()
+        if idx is not None:
+            self.spids[idx] = i
+        vw, vh = float(s.get("vw", 24)), float(s.get("vh", 24))
+        K = 1000.0
+        pw, ph = int(vw * K), int(vh * K)
+
+        def P(x, y):
+            return f'<a:pt x="{int(round(float(x) * K))}" y="{int(round(float(y) * K))}"/>'
+        out = []
+        for pth in s["paths"]:
+            seg = []
+            for c in pth["cmds"]:
+                op = c[0]
+                if op == "M":
+                    seg.append(f"<a:moveTo>{P(c[1], c[2])}</a:moveTo>")
+                elif op == "L":
+                    seg.append(f"<a:lnTo>{P(c[1], c[2])}</a:lnTo>")
+                elif op == "C":
+                    seg.append(f"<a:cubicBezTo>{P(c[1], c[2])}{P(c[3], c[4])}{P(c[5], c[6])}</a:cubicBezTo>")
+                elif op == "Q":
+                    seg.append(f"<a:quadBezTo>{P(c[1], c[2])}{P(c[3], c[4])}</a:quadBezTo>")
+                elif op == "Z":
+                    seg.append("<a:close/>")
+            fa = "" if pth.get("fill") else ' fill="none"'
+            sa = "" if pth.get("stroke", True) else ' stroke="0"'
+            out.append(f'<a:path w="{pw}" h="{ph}"{fa}{sa}>{"".join(seg)}</a:path>')
+        g = (f'<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/><a:rect l="0" t="0" r="r" b="b"/>'
+             f'<a:pathLst>{"".join(out)}</a:pathLst></a:custGeom>')
+        nm = self._name(s, i, "Icon")
+        ln = line_xml(s.get("line"), s.get("lw") or 1.5, None, None, "rnd") if s.get("line") else "<a:ln><a:noFill/></a:ln>"
+        self.parts.append(
+            f'<p:sp><p:nvSpPr><p:cNvPr id="{i}" name="{nm}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>'
+            f'<p:spPr>{xfrm(s["x"], s["y"], s["w"], s["h"], s.get("rot") or 0)}{g}{solid(s.get("fill"))}{ln}</p:spPr></p:sp>')
 
 
 class Media:
@@ -284,9 +400,10 @@ class Media:
 
 
 # ---------------------------------------------------------------- 고정 부품
-def _theme_xml(font, accents):
+def _theme_xml(font, accents, font_ea=None):
     acc = "".join(f'<a:accent{i + 1}><a:srgbClr val="{c}"/></a:accent{i + 1}>' for i, c in enumerate(accents[:6]))
     f = A(font)
+    fe = A(font_ea or font)
     fill = ('<a:solidFill><a:schemeClr val="phClr"/></a:solidFill>')
     return (f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             f'<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="pptx_maker">'
@@ -294,8 +411,8 @@ def _theme_xml(font, accents):
             f'<a:dk1><a:srgbClr val="000000"/></a:dk1><a:lt1><a:srgbClr val="FFFFFF"/></a:lt1>'
             f'<a:dk2><a:srgbClr val="1D1D1F"/></a:dk2><a:lt2><a:srgbClr val="F5F5F7"/></a:lt2>{acc}'
             f'<a:hlink><a:srgbClr val="0563C1"/></a:hlink><a:folHlink><a:srgbClr val="954F72"/></a:folHlink></a:clrScheme>'
-            f'<a:fontScheme name="pptx_maker"><a:majorFont><a:latin typeface="{f}"/><a:ea typeface="{f}"/><a:cs typeface=""/></a:majorFont>'
-            f'<a:minorFont><a:latin typeface="{f}"/><a:ea typeface="{f}"/><a:cs typeface=""/></a:minorFont></a:fontScheme>'
+            f'<a:fontScheme name="pptx_maker"><a:majorFont><a:latin typeface="{f}"/><a:ea typeface="{fe}"/><a:cs typeface=""/></a:majorFont>'
+            f'<a:minorFont><a:latin typeface="{f}"/><a:ea typeface="{fe}"/><a:cs typeface=""/></a:minorFont></a:fontScheme>'
             f'<a:fmtScheme name="pptx_maker"><a:fillStyleLst>{fill}{fill}{fill}</a:fillStyleLst>'
             f'<a:lnStyleLst><a:ln w="6350">{fill}</a:ln><a:ln w="12700">{fill}</a:ln><a:ln w="19050">{fill}</a:ln></a:lnStyleLst>'
             f'<a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle>'
@@ -370,7 +487,11 @@ def _notes(text, lang):
 
 
 def _rels(items):
-    body = "".join(f'<Relationship Id="{i}" Type="{t}" Target="{A(g)}"/>' for i, t, g in items)
+    body = ""
+    for it in items:
+        i, t, g = it[0], it[1], it[2]
+        mode = f' TargetMode="{it[3]}"' if len(it) > 3 and it[3] else ""
+        body += f'<Relationship Id="{i}" Type="{t}" Target="{A(g)}"{mode}/>'
     return (f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             f'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">{body}</Relationships>')
 
@@ -379,8 +500,8 @@ RT = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/"
 
 
 # ---------------------------------------------------------------- 저장
-def write_pptx(deck: dict, path: str, cache_dir: str | None = None, accents=None) -> dict:
-    """deck(dict) → .pptx. 반환: {'path', 'slides', 'warnings'}"""
+def write_pptx(deck: dict, path: str, cache_dir: str | None = None, accents=None, embed=None) -> dict:
+    """deck(dict) → .pptx. embed: [(글꼴 이름, {'regular': EOT 바이트, 'bold': …})] (선택). 반환: {'path', 'slides', 'warnings'}"""
     from .core import cache_dir as _cd
     cache_dir = cache_dir or _cd()
     lang = deck.get("lang", "ko-KR")
@@ -388,22 +509,28 @@ def write_pptx(deck: dict, path: str, cache_dir: str | None = None, accents=None
     media = Media()
     warn = []
     slide_xml, slide_rels, notes_xml = [], [], []
+    n_anim = 0
     for n, sd in enumerate(deck["slides"], start=1):
         b = SlideBuilder(lang, media)
-        for s in sd["shapes"]:
+        for idx, s in enumerate(sd["shapes"]):
             k = s["k"]
             if k in ("rect", "oval", "text"):
-                b.sp_box(s, warn, sd.get("sid"))
+                b.sp_box(s, warn, sd.get("sid"), idx)
             elif k == "img":
-                b.pic(s, cache_dir)
+                b.pic(s, cache_dir, idx)
             elif k == "line":
-                b.cxn(s)
+                b.cxn(s, idx)
             elif k == "poly":
-                b.poly(s)
+                b.poly(s, idx)
+            elif k == "path":
+                b.path(s, idx)
         bg = sd.get("bg") or "FFFFFF"
+        trans = _motion.transition_xml(sd.get("transition"))
+        timing = _motion.timing_xml(sd.get("steps") or [], b.spids, b.text_ids)
+        n_anim += bool(timing)
         xml = (f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:sld {NS}><p:cSld>'
                f'<p:bg><p:bgPr>{solid(bg)}<a:effectLst/></p:bgPr></p:bg><p:spTree>{GRP}{"".join(b.parts)}</p:spTree></p:cSld>'
-               f'<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>')
+               f'<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>{trans}{timing}</p:sld>')
         rels = [("rId1", RT + "slideLayout", "../slideLayouts/slideLayout1.xml")] + b.rels
         rels.append((f"rId{len(rels) + 1}", RT + "notesSlide", f"../notesSlides/notesSlide{n}.xml"))
         slide_xml.append(xml)
@@ -413,6 +540,7 @@ def write_pptx(deck: dict, path: str, cache_dir: str | None = None, accents=None
     accents = accents or ["0A5CFF", "1F2F86", "0B8A80", "1F9254", "C77700", "D3263E"]
     font = deck.get("font") or "Pretendard"
     now = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    embed = embed or []
 
     ct = ['<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>',
           '<Default Extension="xml" ContentType="application/xml"/>',
@@ -430,6 +558,8 @@ def write_pptx(deck: dict, path: str, cache_dir: str | None = None, accents=None
           '<Override PartName="/ppt/tableStyles.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.tableStyles+xml"/>',
           '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>',
           '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>']
+    if embed:
+        ct.insert(2, '<Default Extension="fntdata" ContentType="application/x-fontdata"/>')
     for i in range(1, n_sl + 1):
         ct.append(f'<Override PartName="/ppt/slides/slide{i}.xml" ContentType="{CT["slide"]}"/>')
         ct.append(f'<Override PartName="/ppt/notesSlides/notesSlide{i}.xml" ContentType="{CT["notes"]}"/>')
@@ -443,12 +573,29 @@ def write_pptx(deck: dict, path: str, cache_dir: str | None = None, accents=None
     k = n_sl + 3
     pres_rels += [(f"rId{k}", RT + "presProps", "presProps.xml"), (f"rId{k + 1}", RT + "viewProps", "viewProps.xml"),
                   (f"rId{k + 2}", RT + "theme", "theme/theme1.xml"), (f"rId{k + 3}", RT + "tableStyles", "tableStyles.xml")]
+    k += 4
+    font_parts = []
+    efl = ""
+    for typeface, styles in embed:
+        inner = ""
+        for st in ("regular", "bold", "italic", "boldItalic"):
+            if st in styles:
+                name = f"fonts/font{len(font_parts) + 1}.fntdata"
+                font_parts.append((name, styles[st]))
+                rid = f"rId{k}"
+                k += 1
+                pres_rels.append((rid, RT + "font", name))
+                inner += f'<p:{st} r:id="{rid}"/>'
+        efl += f'<p:embeddedFont><p:font typeface="{A(typeface)}" pitchFamily="2" charset="-127"/>{inner}</p:embeddedFont>'
+    if efl:
+        efl = f"<p:embeddedFontLst>{efl}</p:embeddedFontLst>"
     sld_ids = "".join(f'<p:sldId id="{255 + i}" r:id="rId{i + 2}"/>' for i in range(1, n_sl + 1))
-    pres = (f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:presentation {NS} saveSubsetFonts="1">'
+    emb_at = ' embedTrueTypeFonts="1"' if embed else ""
+    pres = (f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:presentation {NS} saveSubsetFonts="1"{emb_at}>'
             f'<p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst>'
             f'<p:notesMasterIdLst><p:notesMasterId r:id="rId2"/></p:notesMasterIdLst>'
             f'<p:sldIdLst>{sld_ids}</p:sldIdLst><p:sldSz cx="{cx}" cy="{cy}"/><p:notesSz cx="6858000" cy="9144000"/>'
-            f'<p:defaultTextStyle>{_styles(1800)}</p:defaultTextStyle></p:presentation>')
+            f'{efl}<p:defaultTextStyle>{_styles(1800)}</p:defaultTextStyle></p:presentation>')
     core = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" '
             'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" '
@@ -465,7 +612,10 @@ def write_pptx(deck: dict, path: str, cache_dir: str | None = None, accents=None
     root_rels = _rels([("rId1", RT + "officeDocument", "ppt/presentation.xml"),
                        ("rId2", "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties", "docProps/core.xml"),
                        ("rId3", RT + "extended-properties", "docProps/app.xml")])
-    pres_props = (f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:presentationPr {NS}/>')
+    loop = ' loop="1"' if deck.get("loop") else ""
+    pres_props = (f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:presentationPr {NS}>'
+                  f'<p:showPr{loop} showNarration="1"><p:present/><p:sldAll/><p:penClr><a:prstClr val="red"/></p:penClr></p:showPr>'
+                  f'</p:presentationPr>')
     view_props = (f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:viewPr {NS}>'
                   '<p:normalViewPr><p:restoredLeft sz="15620"/><p:restoredTop sz="94660"/></p:normalViewPr>'
                   '<p:gridSpacing cx="76200" cy="76200"/></p:viewPr>')
@@ -484,8 +634,8 @@ def write_pptx(deck: dict, path: str, cache_dir: str | None = None, accents=None
         z.writestr("ppt/presProps.xml", pres_props)
         z.writestr("ppt/viewProps.xml", view_props)
         z.writestr("ppt/tableStyles.xml", table_styles)
-        z.writestr("ppt/theme/theme1.xml", _theme_xml(font, accents))
-        z.writestr("ppt/theme/theme2.xml", _theme_xml(font, accents))
+        z.writestr("ppt/theme/theme1.xml", _theme_xml(font, accents, deck.get("font_ea")))
+        z.writestr("ppt/theme/theme2.xml", _theme_xml(font, accents, deck.get("font_ea")))
         z.writestr("ppt/slideMasters/slideMaster1.xml", _master())
         z.writestr("ppt/slideMasters/_rels/slideMaster1.xml.rels",
                    _rels([("rId1", RT + "slideLayout", "../slideLayouts/slideLayout1.xml"), ("rId2", RT + "theme", "../theme/theme1.xml")]))
@@ -501,5 +651,8 @@ def write_pptx(deck: dict, path: str, cache_dir: str | None = None, accents=None
                        _rels([("rId1", RT + "notesMaster", "../notesMasters/notesMaster1.xml"), ("rId2", RT + "slide", f"../slides/slide{i + 1}.xml")]))
         for name, data in media.data.items():
             z.writestr(f"ppt/media/{name}", data, compress_type=zipfile.ZIP_STORED)
+        for name, data in font_parts:
+            z.writestr(f"ppt/{name}", data)
     os.replace(tmp, path)
-    return {"path": os.path.abspath(path), "slides": n_sl, "warnings": warn, "media": len(media.data)}
+    return {"path": os.path.abspath(path), "slides": n_sl, "warnings": warn, "media": len(media.data),
+            "animated": n_anim, "embedded_fonts": len(embed)}

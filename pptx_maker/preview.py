@@ -139,3 +139,50 @@ def sheets(pngs, out_dir, per=6, cols=2, thumb_w=800, prefix="sheet"):
     for i in range(0, len(pngs), per):
         out.append(contact_sheet(pngs[i:i + per], os.path.join(out_dir, f"{prefix}_{i // per + 1:02d}.png"), cols=cols, thumb_w=thumb_w))
     return [o for o in out if o]
+
+
+PS_INSPECT = os.path.join(HERE, "ps", "inspect.ps1")
+
+
+def inspect(pptx, timeout=600):
+    """PowerPoint 가 읽은 장마다 전환 효과 번호·애니메이션 수(점검용). PowerPoint 없으면 None."""
+    if not (has_powerpoint() and _shell()):
+        return None
+    tmp = tempfile.mkdtemp(prefix="pptxm_")
+    out = os.path.join(tmp, "inspect.json")
+    cmd = [_shell(), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", PS_INSPECT, "-Pptx", os.path.abspath(pptx), "-Out", out]
+    subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
+    if not os.path.exists(out):
+        return None
+    with open(out, encoding="utf-8-sig") as f:
+        return json.load(f)
+
+
+def export_media(pptx, pdf=True, video=False, height=1080, fps=30, slide_sec=4, timeout=3600):
+    """PowerPoint 로 PDF(글꼴이 들어가 어디서나 같음)·MP4(전환·애니메이션 그대로) 내보내기."""
+    pptx = os.path.abspath(pptx)
+    stem = os.path.splitext(pptx)[0]
+    res = {}
+    if has_powerpoint() and _shell():
+        tmp = tempfile.mkdtemp(prefix="pptxm_")
+        out = os.path.join(tmp, "inspect.json")
+        cmd = [_shell(), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", PS_INSPECT, "-Pptx", pptx, "-Out", out]
+        if pdf:
+            cmd += ["-Pdf", stem + ".pdf"]
+        if video:
+            cmd += ["-Video", stem + ".mp4", "-VideoHeight", str(int(height)), "-Fps", str(int(fps)), "-SlideSec", str(int(slide_sec))]
+        cp = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
+        if pdf:
+            res["pdf"] = stem + ".pdf" if os.path.exists(stem + ".pdf") else f"실패: {(cp.stdout + cp.stderr)[-300:]}"
+        if video:
+            res["mp4"] = stem + ".mp4" if os.path.exists(stem + ".mp4") else f"실패: {(cp.stdout + cp.stderr)[-300:]}"
+        return res
+    soffice = shutil.which("soffice") or shutil.which("libreoffice")
+    if pdf and soffice:
+        subprocess.run([soffice, "--headless", "--convert-to", "pdf", "--outdir", os.path.dirname(pptx), pptx], capture_output=True, timeout=timeout)
+        res["pdf"] = stem + ".pdf" if os.path.exists(stem + ".pdf") else "실패(LibreOffice)"
+    if video:
+        res["mp4"] = "동영상 내보내기는 PowerPoint(Windows)가 필요합니다"
+    if not res:
+        res["pdf"] = "PowerPoint/LibreOffice 가 없어 내보낼 수 없습니다"
+    return res

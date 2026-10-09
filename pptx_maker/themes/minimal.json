@@ -1,0 +1,85 @@
+{
+ "name": "minimal",
+ "order": 15,
+ "label": "미니멀",
+ "mode": "light",
+ "summary": "넓은 여백, 가는 글자, 머리카락 같은 선, 차분한 남청 하나. 말이 주인공인 발표. 강연·철학·감성·오프닝·작가 발표.",
+ "use_for": [
+  "강연",
+  "인문·철학",
+  "오프닝",
+  "작가·연구자 소개"
+ ],
+ "fonts": {
+  "body": "Pretendard",
+  "weights": {
+   "H": "L",
+   "D": "L",
+   "N": "T"
+  }
+ },
+ "tracking": {
+  "H": -0.02,
+  "D": -0.03,
+  "N": -0.03
+ },
+ "neutrals": {
+  "page": "FFFFFF",
+  "panel": "F6F6F6",
+  "panel2": "EEEEEE",
+  "card": "FFFFFF",
+  "ink": "1A1A1A",
+  "body": "3D3D3D",
+  "muted": "6B6B6B",
+  "faint": "8A8A8A",
+  "rule": "EAEAEA",
+  "rule2": "D4D4D4",
+  "inv_bg": "1A1A1A",
+  "inv_ink": "FFFFFF",
+  "inv_muted": "A0A0A0"
+ },
+ "style": {
+  "radius": 0,
+  "panel": "rule",
+  "section": "minimal",
+  "cover": "type",
+  "statement": "page",
+  "header": "kicker",
+  "footer": "plain",
+  "numeral": "T",
+  "title": "L",
+  "title_size": 32,
+  "decor": "none",
+  "bullet": "—",
+  "card": "top",
+  "closing": "type"
+ },
+ "data": {
+  "pre": "C9D1DE",
+  "post": "3E5C8A",
+  "ramp": [
+   "E1E6EE",
+   "C9D1DE",
+   "93A5C2",
+   "5E7BA6",
+   "3E5C8A"
+  ],
+  "grid": "EAEAEA",
+  "axis": "D4D4D4",
+  "series": [
+   "3E5C8A",
+   "8A8A8A",
+   "B08D57",
+   "6B8F7B",
+   "C9D1DE"
+  ]
+ },
+ "accents": {
+  "steel": "3E5C8A"
+ },
+ "default_accent": "steel",
+ "section_accents": [
+  "steel"
+ ],
+ "motion": "subtle"
+}

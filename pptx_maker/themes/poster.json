@@ -1,0 +1,91 @@
+{
+ "name": "poster",
+ "order": 14,
+ "label": "포스터",
+ "mode": "light",
+ "summary": "화면을 가득 채우는 아주 큰 글자, 장마다 한 색으로 칠한 면, 굵은 선. 캠페인·동기 부여 강연·마케팅·선언문.",
+ "use_for": [
+  "캠페인",
+  "동기 부여 강연",
+  "마케팅 제안",
+  "선언·비전 발표"
+ ],
+ "fonts": {
+  "body": "Pretendard",
+  "head": "Paperlogy",
+  "display": "Paperlogy",
+  "num": "Paperlogy",
+  "weights": {
+   "H": "EB",
+   "D": "BL",
+   "N": "BL"
+  }
+ },
+ "tracking": {
+  "H": -0.03,
+  "D": -0.05,
+  "N": -0.05
+ },
+ "neutrals": {
+  "page": "FFFFFF",
+  "panel": "F2F2F2",
+  "panel2": "E5E5E5",
+  "card": "FFFFFF",
+  "ink": "0F0F0F",
+  "body": "262626",
+  "muted": "5C5C5C",
+  "faint": "767676",
+  "rule": "E5E5E5",
+  "rule2": "0F0F0F",
+  "inv_bg": "0F0F0F",
+  "inv_ink": "FFFFFF",
+  "inv_muted": "A3A3A3",
+  "ink_dark": "0F0F0F"
+ },
+ "style": {
+  "radius": 0,
+  "panel": "fill",
+  "section": "band",
+  "cover": "poster",
+  "statement": "accent",
+  "statement_size": 52,
+  "header": "kicker",
+  "footer": "plain",
+  "numeral": "BL",
+  "title": "EB",
+  "title_size": 36,
+  "decor": "none",
+  "bullet": "■",
+  "card": "fill",
+  "closing": "poster"
+ },
+ "data": {
+  "pre": "C2C2C2",
+  "post": "002FA7",
+  "ramp": [
+   "D6DCF0",
+   "9AAADF",
+   "5E78CF",
+   "002FA7",
+   "001F6E"
+  ],
+  "grid": "E5E5E5",
+  "axis": "0F0F0F",
+  "series": [
+   "002FA7",
+   "FF3D2E",
+   "FFC21A",
+   "0F0F0F",
+   "8C8C8C"
+  ]
+ },
+ "default_accent": "klein",
+ "section_accents": [
+  "klein",
+  "tomato",
+  "sun",
+  "forest",
+  "ink"
+ ],
+ "motion": "dynamic"
+}

@@ -1,0 +1,84 @@
+{
+ "name": "consulting",
+ "order": 5,
+ "label": "컨설팅",
+ "mode": "light",
+ "summary": "결론형 액션 타이틀, 오른쪽 위 장 표시, 아래 핵심 막대. 흑연+코발트, 밀도 높은 읽는 보고서. 경영 전략·기업 보고·이사회 보고.",
+ "use_for": [
+  "경영 전략 보고",
+  "컨설팅 보고서",
+  "이사회 보고",
+  "사업 검토"
+ ],
+ "fonts": {
+  "body": "IBM Plex Sans KR",
+  "weights": {
+   "H": "SB",
+   "D": "B",
+   "N": "L"
+  }
+ },
+ "tracking": {
+  "H": -0.01,
+  "D": -0.02,
+  "N": -0.02
+ },
+ "neutrals": {
+  "page": "FFFFFF",
+  "panel": "F3F4F6",
+  "panel2": "E5E7EA",
+  "card": "FFFFFF",
+  "ink": "16191D",
+  "body": "33383F",
+  "muted": "5F6670",
+  "faint": "7A818B",
+  "rule": "E5E7EA",
+  "rule2": "C9CDD3",
+  "inv_bg": "16191D",
+  "inv_ink": "FFFFFF",
+  "inv_muted": "A3A9B2"
+ },
+ "style": {
+  "radius": 2,
+  "panel": "outline",
+  "section": "white",
+  "cover": "frame",
+  "statement": "page",
+  "header": "rule",
+  "footer": "tracker",
+  "numeral": "L",
+  "title": "SB",
+  "title_size": 24,
+  "decor": "none",
+  "bullet": "•",
+  "card": "outline",
+  "closing": "frame",
+  "body_scale": 0.92,
+  "takeaway": "bar"
+ },
+ "data": {
+  "pre": "B8C0CA",
+  "post": "1F4FD1",
+  "ramp": [
+   "DCE3F7",
+   "A9BCEB",
+   "6D8EDD",
+   "1F4FD1",
+   "15378F"
+  ],
+  "grid": "E5E7EA",
+  "axis": "C9CDD3",
+  "series": [
+   "1F4FD1",
+   "5F6670",
+   "F2A900",
+   "B8C0CA",
+   "13A89E"
+  ]
+ },
+ "default_accent": "cobalt",
+ "section_accents": [
+  "cobalt"
+ ],
+ "motion": "subtle"
+}

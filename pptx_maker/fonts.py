@@ -35,6 +35,34 @@ def first_line_cut(lh: float) -> float:
     return kb + (kb - ka) * (lh - b) / (b - a)
 
 
+_CALIB = None
+
+
+def first_line_delta(font: str, bold: bool = False) -> float:
+    """첫 줄 높이의 글꼴별 차이(글자 크기 배수, Pretendard=0). 목록 글꼴은 PowerPoint 실측값, 그 밖은 세로 값으로 어림."""
+    global _CALIB
+    if _CALIB is None:
+        try:
+            with open(os.path.join(DATA, "line_calib.json"), encoding="utf-8") as f:
+                _CALIB = {k.lower(): v for k, v in json.load(f)["fl"].items()}
+        except Exception:  # noqa
+            _CALIB = {}
+    key = (font + (" Bold" if bold else "")).lower()
+    if key in _CALIB:
+        return _CALIB[key]
+    if font.lower() in _CALIB:
+        return _CALIB[font.lower()]
+    f = face(font, bold)
+    v = getattr(f, "v", None) if f else None
+    if not v or not v.get("hhea"):
+        return 0.0
+    a, d, g = v["hhea"]
+    d = abs(d)
+    if a + d <= 0:
+        return 0.0
+    return round(0.76 * (d / (a + d) - 0.202) - 0.2 * max(0, g) / f.upm, 4)
+
+
 # ---------------------------------------------------------------- sfnt 읽기
 class Face:
     """글꼴 한 벌(굵기 하나)의 폭 정보."""
@@ -46,6 +74,7 @@ class Face:
         self.default = default        # 표에 없는 한글 음절 등의 기본 폭
         self.ascent, self.descent = ascent, descent
         self.path = path
+        self.v = None                 # 세로 값(hhea 등) — 첫 줄 높이 어림에 쓴다
 
     def adv(self, cp: int):
         """advance(글꼴 단위). 없으면 None."""
@@ -170,6 +199,7 @@ def read_face(path, index=0, want_names=False):
     upm = _u16(b, head + 18)
     hhea = t["hhea"][0]
     asc, desc, nhm = _i16(b, hhea + 4), _i16(b, hhea + 6), _u16(b, hhea + 34)
+    gap = _i16(b, hhea + 8)
     hmtx = t["hmtx"][0]
     adv = [_u16(b, hmtx + 4 * i) for i in range(nhm)]
     cmap = _cmap(b, t["cmap"][0])
@@ -178,6 +208,7 @@ def read_face(path, index=0, want_names=False):
     names = _names(b, t["name"][0]) if ("name" in t) else {}
     fam = names.get(1, os.path.basename(path))
     face = Face(fam, upm, widths, None, asc, -desc, path)
+    face.v = {"hhea": [asc, desc, gap]}
     if want_names:
         return face, names
     return face
@@ -211,26 +242,20 @@ def _cache_dir():
 _INDEX = None
 
 
-def font_index():
-    """시스템 글꼴 목록: '가족|굵게' → (경로, ttc 번호). 처음 한 번 만들고 캐시한다."""
-    global _INDEX
-    if _INDEX is not None:
-        return _INDEX
-    dirs = font_dirs()
-    stamp = {d: os.path.getmtime(d) for d in dirs}
-    cpath = os.path.join(_cache_dir(), "fontindex.json")
+def _scan(dirs, cpath):
+    """글꼴 폴더들 → '가족|굵게' → (경로, ttc 번호). 폴더 수정 시각이 같으면 저장해 둔 목록을 쓴다."""
+    stamp = {d: os.path.getmtime(d) for d in dirs if os.path.isdir(d)}
     try:
         with open(cpath, encoding="utf-8") as f:
             c = json.load(f)
-        if c.get("stamp") == {k: v for k, v in stamp.items()} and c.get("v") == 2:
-            _INDEX = c["index"]
-            return _INDEX
+        if c.get("stamp") == stamp and c.get("v") == 3:
+            return c["index"]
     except Exception:  # noqa
         pass
     idx = {}
-    for d in dirs:
+    for d in stamp:
         for root, _, files in os.walk(d):
-            for fn in files:
+            for fn in sorted(files):
                 if not fn.lower().endswith((".ttf", ".otf", ".ttc")):
                     continue
                 p = os.path.join(root, fn)
@@ -253,14 +278,43 @@ def font_index():
                         continue
                     sub = (nm.get(2) or "").lower()
                     bold = ("bold" in sub) and ("semi" not in sub) and ("extra" not in sub) and ("ultra" not in sub)
-                    for fam in {nm.get(1), nm.get(16)} - {None}:
+                    fams = {nm.get(1)}
+                    if nm.get(16) and (nm.get(17) or "regular").lower() in ("regular", "bold", "normal"):
+                        fams.add(nm.get(16))
+                    for fam in fams - {None}:
                         key = f"{fam.lower()}|{'b' if bold else 'r'}"
                         if "italic" in sub or "oblique" in sub:
                             key += "|i"
                         idx.setdefault(key, [p, k])
     try:
         with open(cpath, "w", encoding="utf-8") as f:
-            json.dump({"v": 2, "stamp": stamp, "index": idx}, f, ensure_ascii=False)
+            json.dump({"v": 3, "stamp": stamp, "index": idx}, f, ensure_ascii=False)
+    except Exception:  # noqa
+        pass
+    return idx
+
+
+_SYS = None
+
+
+def system_index():
+    """이 PC 에 설치된 글꼴만(PowerPoint 가 바로 쓸 수 있는 것)."""
+    global _SYS
+    if _SYS is None:
+        _SYS = _scan(font_dirs(), os.path.join(_cache_dir(), "fontindex.json"))
+    return _SYS
+
+
+def font_index():
+    """설치된 글꼴 + pptx_maker 가 내려받은 글꼴(캐시). 같은 이름이면 설치된 쪽."""
+    global _INDEX
+    if _INDEX is not None:
+        return _INDEX
+    idx = dict(system_index())
+    try:
+        from .fontreg import cache_dir as _fc
+        for k, v in _scan([_fc()], os.path.join(_cache_dir(), "fontindex_cache.json")).items():
+            idx.setdefault(k, v)
     except Exception:  # noqa
         pass
     _INDEX = idx
@@ -285,7 +339,9 @@ def _bundled():
                     for start, vals in fd["runs"]:
                         for i, w in enumerate(vals):
                             widths[start + i] = w
-                    _BUNDLED[face_name.lower()] = Face(face_name, d["upm"], widths, fd.get("hangul"), d["ascent"], d["descent"])
+                    fc = Face(face_name, fd.get("upm", d["upm"]), widths, fd.get("hangul"), d["ascent"], d["descent"])
+                    fc.v = fd.get("v")
+                    _BUNDLED[face_name.lower()] = fc
     return _BUNDLED
 
 
@@ -320,9 +376,17 @@ def is_wide(cp: int) -> bool:
 _FALLBACK = {}
 
 
-def char_width(ch: str, font: str, bold: bool, size: float, fallback: str | None = "Malgun Gothic") -> float:
-    """글자 하나의 폭(pt)."""
+def is_ea(cp: int) -> bool:
+    """PowerPoint 가 동아시아 글꼴(a:ea)로 그리는 글자인가(한글·한자·가나·전각·CJK 문장부호)."""
+    return (0x1100 <= cp <= 0x11FF or 0x2E80 <= cp <= 0x9FFF or 0xAC00 <= cp <= 0xD7A3 or 0xF900 <= cp <= 0xFAFF
+            or 0xFF00 <= cp <= 0xFFEF or 0x3130 <= cp <= 0x318F or 0xA960 <= cp <= 0xA97F or 0xD7B0 <= cp <= 0xD7FF)
+
+
+def char_width(ch: str, font: str, bold: bool, size: float, fallback: str | None = "Malgun Gothic", ea: str | None = None) -> float:
+    """글자 하나의 폭(pt). ea 를 주면 한글·한자는 그 글꼴로 잰다(라틴·한글 글꼴이 다른 런)."""
     cp = ord(ch)
+    if ea and is_ea(cp):
+        font = ea
     f = face(font, bold)
     if f is not None:
         a = f.adv(cp)
@@ -340,8 +404,8 @@ def char_width(ch: str, font: str, bold: bool, size: float, fallback: str | None
     return (1.0 if is_wide(cp) or cp > 0x2000 else 0.56) * size
 
 
-def text_width(s: str, font: str = "Pretendard", bold: bool = False, size: float = 16.0) -> float:
-    return sum(char_width(ch, font, bold, size) for ch in s)
+def text_width(s: str, font: str = "Pretendard", bold: bool = False, size: float = 16.0, ea: str | None = None) -> float:
+    return sum(char_width(ch, font, bold, size, ea=ea) for ch in s)
 
 
 def has_font(name: str) -> bool:

@@ -1,0 +1,102 @@
+{
+ "name": "classroom",
+ "order": 9,
+ "label": "교실",
+ "mode": "light",
+ "summary": "둥근 제목 글꼴과 큰 글자, 활동마다 정한 색(생각=하늘, 활동=해바라기, 정리=초록), 둥근 모서리, 동그라미 번호. 초등·중등 수업·학부모·방과후.",
+ "use_for": [
+  "초등 수업",
+  "중등 수업",
+  "방과후",
+  "학부모 설명회",
+  "어린이 행사"
+ ],
+ "fonts": {
+  "body": "Pretendard",
+  "head": "Jua",
+  "display": "Jua",
+  "num": "Jua",
+  "weights": {
+   "H": "R",
+   "D": "R",
+   "N": "R"
+  }
+ },
+ "tracking": {
+  "H": 0,
+  "D": -0.01,
+  "N": 0
+ },
+ "neutrals": {
+  "page": "FFFFFF",
+  "panel": "F1F6FC",
+  "panel2": "E3EDF8",
+  "card": "FFFFFF",
+  "ink": "1D2B3A",
+  "body": "34465A",
+  "muted": "5C6B7A",
+  "faint": "7A8796",
+  "rule": "E1E8F0",
+  "rule2": "C9D5E2",
+  "inv_bg": "1D2B3A",
+  "inv_ink": "FFFFFF",
+  "inv_muted": "B7C6D6",
+  "ink_dark": "1D2B3A"
+ },
+ "style": {
+  "radius": 18,
+  "panel": "tint",
+  "section": "band",
+  "cover": "shapes",
+  "statement": "accent",
+  "header": "pill",
+  "footer": "dots",
+  "numeral": "R",
+  "title": "R",
+  "title_size": 34,
+  "decor": "shapes",
+  "bullet": "●",
+  "card": "tint",
+  "closing": "shapes",
+  "body_scale": 1.12
+ },
+ "data": {
+  "pre": "A9C9FB",
+  "post": "2E7DF6",
+  "ramp": [
+   "D5E5FD",
+   "A9C9FB",
+   "6EA4F8",
+   "2E7DF6",
+   "1B5BC2"
+  ],
+  "grid": "E1E8F0",
+  "axis": "C9D5E2",
+  "series": [
+   "2E7DF6",
+   "FFC21A",
+   "3BB273",
+   "FF5A4E",
+   "8C9AA8"
+  ]
+ },
+ "accents": {
+  "sun": {
+   "base": "FFC21A",
+   "deep": "8A5F00",
+   "soft": "FFEFC2",
+   "wash": "FFF8E6",
+   "glow": "FFD866",
+   "field": "5C3F00"
+  }
+ },
+ "default_accent": "sky",
+ "section_accents": [
+  "sky",
+  "sun",
+  "forest",
+  "tomato",
+  "teal"
+ ],
+ "motion": "build"
+}

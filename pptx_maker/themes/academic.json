@@ -1,0 +1,90 @@
+{
+ "name": "academic",
+ "order": 8,
+ "label": "학술",
+ "mode": "light",
+ "summary": "명조 제목 + 고딕 본문, 옥스블러드 하나. 그림 번호·쪽수 '12 / 34'·참고문헌 줄. 학회 발표·논문 심사·연구 보고.",
+ "use_for": [
+  "학회 발표",
+  "논문 심사",
+  "연구 보고",
+  "세미나",
+  "학위 발표"
+ ],
+ "fonts": {
+  "body": "IBM Plex Sans KR",
+  "head": "NanumMyeongjo",
+  "display": "NanumMyeongjo",
+  "num": "IBM Plex Sans KR",
+  "weights": {
+   "H": "B",
+   "D": "EB",
+   "N": "L"
+  }
+ },
+ "tracking": {
+  "H": -0.01,
+  "D": -0.02,
+  "N": -0.02
+ },
+ "neutrals": {
+  "page": "FFFFFF",
+  "panel": "F4F3F1",
+  "panel2": "E9E7E3",
+  "card": "FFFFFF",
+  "ink": "1F1F1F",
+  "body": "333333",
+  "muted": "666666",
+  "faint": "7A7A7A",
+  "rule": "E3E1DD",
+  "rule2": "C8C5BF",
+  "inv_bg": "2A1414",
+  "inv_ink": "FFFFFF",
+  "inv_muted": "C9A9A9"
+ },
+ "style": {
+  "radius": 0,
+  "panel": "outline",
+  "section": "minimal",
+  "cover": "center",
+  "statement": "serif",
+  "header": "serif",
+  "footer": "page",
+  "numeral": "L",
+  "title": "B",
+  "title_size": 28,
+  "decor": "none",
+  "bullet": "•",
+  "card": "outline",
+  "closing": "center"
+ },
+ "data": {
+  "pre": "56B4E9",
+  "post": "0072B2",
+  "ramp": [
+   "D6E8F5",
+   "9CC8EA",
+   "56B4E9",
+   "0072B2",
+   "004A75"
+  ],
+  "grid": "E3E1DD",
+  "axis": "C8C5BF",
+  "series": [
+   "0072B2",
+   "E69F00",
+   "009E73",
+   "D55E00",
+   "56B4E9",
+   "CC79A7"
+  ]
+ },
+ "default_accent": "oxblood",
+ "section_accents": [
+  "oxblood",
+  "ink",
+  "teal",
+  "forest"
+ ],
+ "motion": "subtle"
+}

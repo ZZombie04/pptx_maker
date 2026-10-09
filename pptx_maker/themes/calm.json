@@ -1,0 +1,95 @@
+{
+ "name": "calm",
+ "order": 16,
+ "label": "쉼(상담·건강)",
+ "mode": "light",
+ "summary": "옅은 세이지 바탕, 고운바탕 제목과 고운돋움 본문, 채도 낮은 색, 넉넉한 줄 간격과 둥근 모서리. 상담·심리·건강·마음 챙김·복지.",
+ "use_for": [
+  "상담·심리",
+  "건강 교육",
+  "마음 챙김",
+  "복지 안내",
+  "부모 교육"
+ ],
+ "fonts": {
+  "body": "Gowun Dodum",
+  "head": "Gowun Batang",
+  "display": "Gowun Batang",
+  "num": "Gowun Batang",
+  "weights": {
+   "H": "B",
+   "D": "B",
+   "N": "R"
+  }
+ },
+ "tracking": {
+  "H": -0.01,
+  "D": -0.02,
+  "N": 0
+ },
+ "neutrals": {
+  "page": "F4F6F3",
+  "panel": "FFFFFF",
+  "panel2": "E6EBE5",
+  "card": "FFFFFF",
+  "ink": "2B3430",
+  "body": "3F4A45",
+  "muted": "5F6B65",
+  "faint": "7A857F",
+  "rule": "DCE3DE",
+  "rule2": "C5CFC8",
+  "inv_bg": "2B3430",
+  "inv_ink": "FFFFFF",
+  "inv_muted": "B5C2BA"
+ },
+ "style": {
+  "radius": 20,
+  "panel": "fill",
+  "section": "center",
+  "cover": "center",
+  "statement": "serif",
+  "header": "kicker",
+  "footer": "dots",
+  "numeral": "R",
+  "title": "B",
+  "title_size": 30,
+  "decor": "none",
+  "bullet": "○",
+  "card": "fill",
+  "closing": "center",
+  "body_scale": 1.05
+ },
+ "data": {
+  "pre": "C7D6CD",
+  "post": "5E8B73",
+  "ramp": [
+   "DCE7E0",
+   "B9CFC2",
+   "8FB19D",
+   "5E8B73",
+   "3E6450"
+  ],
+  "grid": "DCE3DE",
+  "axis": "C5CFC8",
+  "series": [
+   "5E8B73",
+   "6A8CAF",
+   "C7A36B",
+   "B97A7A",
+   "9AA59F"
+  ]
+ },
+ "accents": {
+  "sage": "5E8B73",
+  "mist": "5F82A6",
+  "clay": "A86B4F"
+ },
+ "default_accent": "sage",
+ "section_accents": [
+  "sage",
+  "mist",
+  "clay",
+  "teal"
+ ],
+ "motion": "subtle"
+}

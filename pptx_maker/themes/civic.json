@@ -1,51 +1,78 @@
 {
-  "name": "civic",
-  "label": "시빅",
-  "mode": "light",
-  "summary": "차가운 회색 면과 남색 중심의 단정한 공공 문서형. 모서리 6, 굵은 숫자. 공공기관·교육청·행정 보고·사업 설명.",
-  "use_for": [
-    "공공기관 보고",
-    "사업 설명회",
-    "행정 연수",
-    "정책 브리핑"
+ "name": "civic",
+ "order": 3,
+ "label": "시빅(공공)",
+ "mode": "light",
+ "summary": "정부 남색과 차가운 회색의 단정한 공공 보고형. 개조식 글머리(□ ○), 왼쪽 남색 판 표지, 모서리 6. 공공기관·교육청·행정 보고·사업 설명.",
+ "use_for": [
+  "공공기관 보고",
+  "사업 설명회",
+  "행정 연수",
+  "정책 브리핑",
+  "학부모 설명회"
+ ],
+ "fonts": {
+  "body": "Pretendard"
+ },
+ "neutrals": {
+  "page": "FFFFFF",
+  "panel": "F2F4F7",
+  "panel2": "E6EAF0",
+  "card": "FFFFFF",
+  "ink": "131A26",
+  "body": "334155",
+  "muted": "5B6576",
+  "faint": "7F8A9E",
+  "rule": "E3E7ED",
+  "rule2": "CBD2DC",
+  "inv_bg": "0E2240",
+  "inv_ink": "FFFFFF",
+  "inv_muted": "A9B8D6"
+ },
+ "style": {
+  "radius": 6,
+  "panel": "fill",
+  "section": "field",
+  "cover": "band",
+  "statement": "inv",
+  "header": "rule",
+  "footer": "progress",
+  "numeral": "B",
+  "title": "B",
+  "decor": "none",
+  "bullet": "□",
+  "bullet2": "○",
+  "card": "outline",
+  "closing": "band"
+ },
+ "data": {
+  "pre": "9DB3D9",
+  "post": "003764",
+  "ramp": [
+   "C7D3E8",
+   "9DB3D9",
+   "5D7FB8",
+   "1F4F8F",
+   "003764"
   ],
-  "font": "Pretendard",
-  "neutrals": {
-    "page": "FFFFFF",
-    "panel": "F2F4F7",
-    "panel2": "E6EAF0",
-    "card": "FFFFFF",
-    "ink": "131A26",
-    "body": "334155",
-    "muted": "5B6576",
-    "faint": "7F8A9E",
-    "rule": "E3E7ED",
-    "rule2": "CBD2DC",
-    "inv_bg": "121B4D",
-    "inv_ink": "FFFFFF",
-    "inv_muted": "9DAEF5"
-  },
-  "style": {
-    "radius": 6,
-    "panel": "fill",
-    "section": "field",
-    "statement": "inv",
-    "numeral": "B",
-    "title": "B",
-    "footer": "progress"
-  },
-  "data": {
-    "pre": "9DAEF5",
-    "post": "1F2F86",
-    "ramp": [
-      "C7D0F3",
-      "9DAEF5",
-      "6D84E6",
-      "2D44B8",
-      "1F2F86"
-    ],
-    "grid": "E3E7ED",
-    "axis": "CBD2DC"
-  },
-  "default_accent": "navy"
+  "grid": "E3E7ED",
+  "axis": "CBD2DC",
+  "series": [
+   "003764",
+   "2F7D5B",
+   "C77700",
+   "CD2E3A",
+   "5B6576"
+  ]
+ },
+ "default_accent": "govblue",
+ "section_accents": [
+  "govblue",
+  "teal",
+  "forest",
+  "amber",
+  "navy",
+  "crimson"
+ ],
+ "motion": "subtle"
 }

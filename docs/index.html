@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pptx_maker — 한국어 발표 자료를 디자이너처럼</title>
+<meta name="description" content="한국어에 강한 PPTX 엔진. 용도 24가지·테마 18가지·슬라이드 48가지·애니메이션·자동 점검. Claude·GPT·Gemini·Grok 어떤 AI 가 써도 같은 품질로.">
+<meta property="og:title" content="pptx_maker — 한국어 발표 자료를 디자이너처럼">
+<meta property="og:description" content="용도 24 · 테마 18 · 슬라이드 48 · 애니메이션 · 자동 점검. 어떤 AI 가 써도 같은 품질.">
+<meta property="og:image" content="https://zzombie04.github.io/pptx_maker/images/og.png">
+<meta property="og:url" content="https://zzombie04.github.io/pptx_maker/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d1d1f'/%3E%3Crect x='7' y='9' width='18' height='12' rx='1.5' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Crect x='10' y='23' width='12' height='2' rx='1' fill='%230a5cff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --ink:#1d1d1f; --body:#424245; --muted:#6e6e73; --faint:#a1a1a6; --line:#d2d2d7;
+  --bg:#ffffff; --panel:#f5f5f7; --black:#000; --accent:#0a5cff; --accent-d:#0043c6;
+  --max:1120px; --r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;word-break:keep-all;line-height:1.5}
+img,video{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+.eyebrow{font-size:15px;font-weight:600;color:var(--accent-d);letter-spacing:.01em;margin-bottom:14px}
+h1,h2,h3{letter-spacing:-.025em;line-height:1.12;font-weight:800}
+h2{font-size:clamp(34px,5.4vw,60px)}
+.lede{font-size:clamp(18px,2.1vw,22px);color:var(--muted);line-height:1.55;margin-top:18px;max-width:720px}
+section{padding:140px 0}
+.center{text-align:center}.center .lede{margin-left:auto;margin-right:auto}
+
+/* 이동 막대 */
+nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:saturate(180%) blur(18px);-webkit-backdrop-filter:saturate(180%) blur(18px);border-bottom:1px solid rgba(0,0,0,.06)}
+nav .wrap{display:flex;align-items:center;height:52px;gap:28px}
+nav .logo{font-weight:800;font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+nav .logo i{width:18px;height:13px;border:2px solid var(--ink);border-radius:2px;position:relative;display:inline-block}
+nav .logo i:after{content:"";position:absolute;left:2px;right:2px;bottom:-6px;height:2px;background:var(--accent);border-radius:1px}
+nav .links{display:flex;gap:24px;margin-left:auto;font-size:14px;color:var(--body)}
+nav .links a:hover{color:var(--ink)}
+nav .gh{font-size:13px;font-weight:600;padding:7px 14px;border-radius:999px;background:var(--ink);color:#fff}
+@media (max-width:760px){nav .links{display:none}nav .gh{margin-left:auto}}
+
+/* 첫 화면 */
+.hero{padding:110px 0 40px;text-align:center;overflow:hidden}
+.hero h1{font-size:clamp(46px,8.6vw,104px);font-weight:900;letter-spacing:-.04em;line-height:1.04}
+.hero h1 span{color:var(--accent)}
+.hero .lede{margin:26px auto 0;max-width:660px}
+.cta{display:flex;gap:12px;justify-content:center;margin-top:36px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 24px;border-radius:999px;font-weight:600;font-size:16px;transition:transform .2s ease,background .2s}
+.btn.primary{background:var(--accent);color:#fff}.btn.primary:hover{background:var(--accent-d)}
+.btn.ghost{color:var(--accent-d)}.btn.ghost:hover{text-decoration:underline}
+.btn:active{transform:scale(.97)}
+.stage{margin-top:80px;perspective:1600px}
+.stage-inner{transform-origin:50% 0;will-change:transform}
+.marquee{display:flex;gap:18px;width:max-content;animation:slide 90s linear infinite}
+.marquee.rev{animation-direction:reverse;margin-top:18px}
+.marquee img{width:min(420px,70vw);aspect-ratio:16/9;border-radius:10px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 10px 30px rgba(0,0,0,.08);object-fit:cover;background:var(--panel)}
+@keyframes slide{to{transform:translateX(-50%)}}
+.hero:hover .marquee{animation-play-state:paused}
+
+/* 숫자 띠 */
+.numbers{padding:70px 0 40px}
+.numbers .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;border-top:1px solid var(--line);padding-top:36px}
+.numbers b{display:block;font-size:clamp(44px,6vw,72px);font-weight:900;letter-spacing:-.04em;line-height:1}
+.numbers span{display:block;margin-top:10px;color:var(--muted);font-size:15px}
+@media (max-width:760px){.numbers .grid{grid-template-columns:repeat(2,1fr);row-gap:40px}}
+
+/* 테마 고정 화면 */
+.themes{background:var(--panel)}
+.tscroll{position:relative;margin-top:64px}
+.tsticky{position:sticky;top:76px;display:grid;grid-template-columns:280px 1fr;gap:48px;align-items:start}
+.tlist{list-style:none;font-size:15px;columns:1}
+.tlist li{padding:7px 0;color:var(--faint);cursor:pointer;transition:color .25s;display:flex;gap:12px;align-items:baseline}
+.tlist li em{font-style:normal;font-size:12px;width:22px;color:var(--faint)}
+.tlist li.on{color:var(--ink);font-weight:700}
+.tlist li.on em{color:var(--accent)}
+.tframe{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05),0 30px 60px rgba(0,0,0,.12)}
+.tframe img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s ease,transform .6s ease;transform:scale(1.015)}
+.tframe img.on{opacity:1;transform:none}
+.tcap{margin-top:18px;font-size:15px;color:var(--muted);min-height:48px}
+.tcap b{color:var(--ink);font-weight:700;margin-right:8px}
+.tspacer{height:calc(18 * 26vh)}
+@media (max-width:900px){
+  .tsticky{position:static;grid-template-columns:1fr}.tlist{display:none}.tspacer{display:none}
+  .tframe{display:none}.tcap{display:none}
+  .tgrid{display:grid !important}
+}
+.tgrid{display:none;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.tgrid figure{font-size:12px;color:var(--muted)}
+.tgrid img{border-radius:8px;margin-bottom:6px;aspect-ratio:16/9;object-fit:cover}
+
+/* 갤러리 */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:40px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-size:14px;color:var(--body);cursor:pointer;transition:all .2s}
+.chip:hover{border-color:var(--ink)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.deck{margin-top:56px;opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.deck.in{opacity:1;transform:none}
+.deck.hide{display:none}
+.deck header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.deck h3{font-size:24px}
+.deck .tag{font-size:13px;color:var(--muted)}
+.deck .tag b{color:var(--accent-d);font-weight:600}
+.strip{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 18px;scrollbar-width:thin}
+.strip img{flex:0 0 auto;width:min(400px,78vw);aspect-ratio:16/9;object-fit:cover;border-radius:10px;scroll-snap-align:start;cursor:zoom-in;
+  box-shadow:0 1px 2px rgba(0,0,0,.06),0 6px 18px rgba(0,0,0,.07);background:var(--panel);transition:transform .25s}
+.strip img:hover{transform:translateY(-3px)}
+
+/* 움직임 */
+.motion{background:#000;color:#f5f5f7}
+.motion .eyebrow{color:#7fa8ff}
+.motion .lede{color:#a1a1a6}
+.video{margin-top:56px;border-radius:16px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);background:#111;aspect-ratio:16/9}
+.video video{width:100%;height:100%;object-fit:cover}
+.presets{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;margin-top:56px;background:#2c2c2e;border-radius:14px;overflow:hidden}
+.presets div{background:#0b0b0c;padding:24px 20px}
+.presets b{display:block;font-size:17px;margin-bottom:6px;color:#fff}
+.presets span{font-size:14px;color:#a1a1a6;line-height:1.5}
+@media (max-width:900px){.presets{grid-template-columns:1fr 1fr}}
+
+/* 흐름 */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-top:64px;counter-reset:f}
+.flow div{border-top:2px solid var(--ink);padding-top:18px}
+.flow div:before{counter-increment:f;content:"0" counter(f);display:block;font-size:13px;font-weight:700;color:var(--accent-d);margin-bottom:10px}
+.flow b{display:block;font-size:19px;margin-bottom:8px}
+.flow span{font-size:15px;color:var(--muted)}
+.flow code{font-family:"JetBrains Mono",ui-monospace,Consolas,monospace;font-size:13px;color:var(--ink);background:var(--panel);padding:1px 6px;border-radius:5px}
+@media (max-width:900px){.flow{grid-template-columns:1fr 1fr}}
+.ais{display:flex;flex-wrap:wrap;gap:10px;margin-top:40px}
+.ais span{font-size:15px;padding:10px 18px;border-radius:12px;background:var(--panel);color:var(--body)}
+
+/* 점검 */
+.checks{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;margin-top:56px}
+.checks ul{list-style:none;border-top:1px solid var(--line)}
+.checks li{display:flex;justify-content:space-between;gap:20px;padding:15px 0;border-bottom:1px solid var(--line);font-size:16px}
+.checks li span{color:var(--muted);text-align:right}
+.score{background:var(--panel);border-radius:var(--r);padding:44px}
+.score .big{font-size:120px;font-weight:900;letter-spacing:-.05em;line-height:1}
+.score .big small{font-size:36px;color:var(--faint);font-weight:700}
+.bars{margin-top:26px;display:grid;gap:12px}
+.bars div{font-size:14px;color:var(--muted);display:grid;grid-template-columns:96px 1fr 30px;gap:12px;align-items:center}
+.bars i{height:6px;border-radius:3px;background:var(--line);position:relative;overflow:hidden}
+.bars i:after{content:"";position:absolute;inset:0;background:var(--accent);transform-origin:0 50%;transform:scaleX(0);transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.score.in .bars i:after{transform:scaleX(1)}
+@media (max-width:900px){.checks{grid-template-columns:1fr}}
+
+/* 시작 */
+.start{background:var(--panel)}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:56px}
+.card{background:#fff;border-radius:var(--r);padding:30px;min-width:0}
+.card h3{font-size:21px;margin-bottom:8px}
+.card p{font-size:15px;color:var(--muted);margin-bottom:18px}
+pre{position:relative;background:#1d1d1f;color:#f5f5f7;border-radius:12px;padding:42px 18px 16px;font-family:"JetBrains Mono",ui-monospace,Consolas,monospace;font-size:13px;line-height:1.7;overflow-x:auto;white-space:pre}
+pre .c{color:#8e8e93}
+.copy{position:absolute;top:8px;right:8px;font:600 12px/1 inherit;font-family:inherit;color:#d2d2d7;background:#3a3a3c;border:0;border-radius:7px;padding:7px 10px;cursor:pointer}
+.copy:hover{background:#48484a}
+@media (max-width:900px){.cols{grid-template-columns:minmax(0,1fr)}}
+
+footer{padding:56px 0 64px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}
+footer .row{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+footer a{color:var(--ink);font-weight:600}
+footer a:hover{text-decoration:underline}
+footer p+p{margin-top:6px}
+
+/* 나타나기 */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:100;padding:4vw}
+.lb.on{display:flex}
+.lb img{max-height:86vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.lb button{position:absolute;background:none;border:0;color:#fff;font-size:15px;cursor:pointer;padding:16px;opacity:.8}
+.lb button:hover{opacity:1}
+.lb .x{top:10px;right:14px}.lb .p{left:6px;top:50%}.lb .n{right:6px;top:50%}
+.lb .cnt{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:#a1a1a6;font-size:13px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal,.deck{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="logo" href="#top"><i></i>pptx_maker</a>
+  <div class="links"><a href="#themes">테마</a><a href="#gallery">예시 덱</a><a href="#motion">움직임</a><a href="#ai">AI 연결</a><a href="#start">시작하기</a></div>
+  <a class="gh" href="https://github.com/ZZombie04/pptx_maker">GitHub</a>
+</div></nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="eyebrow reveal">pptx_maker 2.0 · 무료 · MIT</div>
+    <h1 class="reveal">발표 자료,<br><span>디자이너처럼.</span></h1>
+    <p class="lede reveal">한국어에 강한 PPTX 엔진. 연수·수업·보고·피치·학회·축제·시상식까지, 상황과 의도에 맞는 디자인을 엔진이 고르고 점검합니다. 어떤 AI 모델이 써도 같은 품질로.</p>
+    <div class="cta reveal"><a class="btn primary" href="#start">시작하기</a><a class="btn ghost" href="#gallery">예시 덱 보기 ›</a></div>
+  </div>
+  <div class="stage"><div class="stage-inner" id="stage">
+    <div class="marquee" id="mq1"></div>
+    <div class="marquee rev" id="mq2"></div>
+  </div></div>
+</header>
+
+<div class="numbers"><div class="wrap"><div class="grid">
+  <div class="reveal"><b data-n="24">24</b><span>용도별 설계(연수·피치·학회…)</span></div>
+  <div class="reveal"><b data-n="18">18</b><span>상황에 맞춘 테마</span></div>
+  <div class="reveal"><b data-n="48">48</b><span>슬라이드 종류·그래프 16</span></div>
+  <div class="reveal"><b data-n="0">0</b><span>필요한 설치 패키지</span></div>
+</div></div></div>
+
+<section class="themes" id="themes">
+  <div class="wrap">
+    <div class="eyebrow reveal">테마 18가지</div>
+    <h2 class="reveal">같은 내용, 열여덟 가지 얼굴.</h2>
+    <p class="lede reveal">테마는 색만 바꾸지 않습니다. 글꼴 짝, 표지와 장 표지의 구성, 머리말, 꼬리말, 카드와 표의 결까지 함께 바뀝니다. 아래로 내려 보세요.</p>
+    <div class="tscroll" id="tscroll">
+      <div class="tsticky">
+        <ol class="tlist" id="tlist"></ol>
+        <div><div class="tframe" id="tframe"></div><p class="tcap" id="tcap"></p></div>
+      </div>
+      <div class="tspacer"></div>
+      <div class="tgrid" id="tgrid"></div>
+    </div>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="wrap">
+    <div class="eyebrow reveal">예시 덱 18개</div>
+    <h2 class="reveal">상황이 다르면, 디자인도 다르게.</h2>
+    <p class="lede reveal">모두 명세(JSON) 한 장으로 만들었고 자동 점검 오류 0 · 경고 0 · 100점입니다. 그림을 누르면 크게 봅니다. 내용·숫자·사람은 가상이고 사진은 생성 이미지입니다.</p>
+    <div class="chips reveal" id="chips"></div>
+    <div id="decks"></div>
+  </div>
+</section>
+
+<section class="motion" id="motion">
+  <div class="wrap">
+    <div class="eyebrow reveal">애니메이션 · 전환</div>
+    <h2 class="reveal">뜻이 있을 때만 움직입니다.</h2>
+    <p class="lede reveal">Fade·Push·Morph 전환과 항목별 나타나기를 PowerPoint 기본 효과로 넣습니다. 덱 전체를 <code style="color:#fff">motion</code> 한 단어로 정하고, 회전·튕기기 같은 효과는 쓰지 않습니다. 아래 영상은 PowerPoint 가 그대로 재생한 화면입니다.</p>
+    <div class="video reveal"><video id="vid" src="media/motion.mp4" poster="media/motion.jpg" muted loop playsinline preload="metadata"></video></div>
+    <div class="presets reveal">
+      <div><b>none</b><span>움직임 없음. 인쇄·배포용</span></div>
+      <div><b>subtle</b><span>짧은 Fade, 내용이 차례로 나타남</span></div>
+      <div><b>build</b><span>클릭마다 항목이 하나씩. 연수·수업</span></div>
+      <div><b>dynamic</b><span>장이 바뀔 때 Push, 숫자 Zoom</span></div>
+      <div><b>morph</b><span>장 번호·큰 숫자가 이어서 움직임</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="ai">
+  <div class="wrap">
+    <div class="eyebrow reveal">어떤 AI 든</div>
+    <h2 class="reveal">모델이 달라도, 결과는 같게.</h2>
+    <p class="lede reveal">디자인 판단(테마·장 색·글꼴·대비·줄바꿈·움직임)은 엔진이 합니다. AI 는 용도별 뼈대의 빈칸만 채우고, 점검이 0이 될 때까지 고칩니다. 그래서 큰 모델도 작은 모델도 같은 품질에 닿습니다.</p>
+    <div class="flow reveal">
+      <div><b>용도 고르기</b><span><code>recipes</code> 24가지 중 하나</span></div>
+      <div><b>뼈대 받기</b><span><code>plan</code> 이 흐름·종류를 정한 명세</span></div>
+      <div><b>빈칸 채우기</b><span>결론형 제목·근거·발표 노트</span></div>
+      <div><b>점검·채점</b><span><code>check</code> · <code>build</code> 오류 0, 100점</span></div>
+      <div><b>눈으로 보기</b><span><code>--preview</code> PowerPoint 실측</span></div>
+    </div>
+    <div class="ais reveal">
+      <span>Claude Code</span><span>Claude Desktop</span><span>Codex CLI</span><span>Gemini CLI</span><span>Antigravity</span><span>Cursor</span><span>Grok CLI</span><span>Kiro</span><span>Windsurf</span><span>VS Code Copilot</span><span>ChatGPT · Claude.ai · Gemini (zip 올리기)</span>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:40px">
+  <div class="wrap">
+    <div class="eyebrow reveal">자동 점검</div>
+    <h2 class="reveal">넘치고 겹치는 일, 엔진이 먼저 봅니다.</h2>
+    <div class="checks">
+      <ul class="reveal">
+        <li>한국어 줄바꿈<span>어절 단위, PowerPoint 실측과 같은 줄 수</span></li>
+        <li>넘침 · 겹침 · 벗어남<span>글자 상자마다 계산</span></li>
+        <li>대비<span>작은 글자 4.5:1, 큰 글자 3:1</span></li>
+        <li>한 장의 색<span>포인트 색 하나</span></li>
+        <li>반복<span>같은 구성 3장 · 같은 사진</span></li>
+        <li>빈칸<span>TODO · 없는 사진 · 없는 아이콘</span></li>
+        <li>발표자 노트<span>모든 장</span></li>
+      </ul>
+      <div class="score reveal" id="score">
+        <div class="big">100<small>/100</small></div>
+        <div class="bars">
+          <div>구성<i></i>25</div><div>다양성<i></i>20</div><div>글<i></i>20</div><div>디자인 점검<i></i>25</div><div>전달<i></i>10</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="start" id="start">
+  <div class="wrap">
+    <div class="eyebrow reveal">시작하기</div>
+    <h2 class="reveal">파이썬만 있으면 됩니다.</h2>
+    <p class="lede reveal">PowerPoint 없이도 .pptx 를 만듭니다. PowerPoint 가 있으면 미리 보기·실측 점검·PDF·MP4 까지.</p>
+    <div class="cols">
+      <div class="card reveal"><h3>AI 프로그램에 연결</h3><p>설치된 AI 를 찾아 MCP 도구와 스킬을 등록합니다(설정 파일은 백업 후 수정).</p>
+<pre><button class="copy">복사</button>git clone https://github.com/ZZombie04/pptx_maker
+cd pptx_maker
+python -m pptx_maker setup --fonts</pre></div>
+      <div class="card reveal"><h3>명령줄로 직접</h3><p>용도별 뼈대를 받아 빈칸을 채우고 만듭니다.</p>
+<pre><button class="copy">복사</button>python -m pptx_maker plan pitch --topic "주제" -o spec.json
+python -m pptx_maker build spec.json --preview</pre></div>
+      <div class="card reveal"><h3>웹 AI 에 올리기</h3><p>ChatGPT·Claude.ai·Gemini 처럼 코드 실행이 되는 AI 에 zip 하나를 올리고 안내 글을 붙여 넣습니다.</p>
+<pre><button class="copy">복사</button>python -m pptx_maker pack -o dist
+<span class="c"># 또는 릴리스에서 pptx_maker-web.zip 받기</span></pre></div>
+    </div>
+    <div class="cta reveal" style="margin-top:56px"><a class="btn primary" href="https://github.com/ZZombie04/pptx_maker">GitHub 에서 보기</a><a class="btn ghost" href="https://github.com/ZZombie04/pptx_maker/releases/latest">릴리스 · 예시 덱 받기 ›</a></div>
+  </div>
+</section>
+
+<footer><div class="wrap"><div class="row">
+  <div><p>만든 사람 <a href="https://joo.is/AI%EB%A6%AC%EC%B9%98%EC%8C%A4">AI리치쌤</a> · <a href="https://joo.is/AI%EB%A6%AC%EC%B9%98%EC%8C%A4">joo.is/AI리치쌤</a></p>
+       <p>pptx_maker · MIT License · 아이콘 Lucide(ISC) · 글꼴은 각 저작권자의 공개 라이선스</p></div>
+  <div><p><a href="https://github.com/ZZombie04/pptx_maker">GitHub</a></p><p>예시의 내용·숫자·사람·기관은 가상이며 사진은 생성 이미지입니다.</p></div>
+</div></div></footer>
+
+<div class="lb" id="lb"><button class="x" aria-label="닫기">닫기 ✕</button><button class="p" aria-label="이전">‹ 이전</button><img alt=""><button class="n" aria-label="다음">다음 ›</button><div class="cnt"></div></div>
+
+<script src="assets/gallery.js"></script>
+<script>
+(function(){
+  var G = window.GALLERY || {decks:[], themes:[]};
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 첫 화면 흐르는 표지
+  var covers = G.decks.map(function(d){ return 'images/decks/' + d.id + '/01.webp'; });
+  var seconds = [];
+  G.decks.forEach(function(d){ if (d.n > 2) seconds.push('images/decks/' + d.id + '/03.webp'); });
+  function fill(el, list){ var h=''; list.concat(list).forEach(function(s){ h += '<img loading="lazy" src="'+s+'" alt="">'; }); el.innerHTML = h; }
+  fill(document.getElementById('mq1'), covers.slice(0, 9).concat(seconds.slice(9)));
+  fill(document.getElementById('mq2'), covers.slice(9).concat(seconds.slice(0, 9)));
+
+  // 첫 화면: 내리면 판이 살짝 눕는다
+  var stage = document.getElementById('stage');
+  function hero(){ var y = Math.min(1, window.scrollY / 700); stage.style.transform = 'rotateX(' + (y*14) + 'deg) scale(' + (1 - y*0.06) + ')'; stage.style.opacity = String(1 - y*0.55); }
+  if (!reduce) { window.addEventListener('scroll', hero, {passive:true}); hero(); }
+
+  // 테마
+  var tl = document.getElementById('tlist'), tf = document.getElementById('tframe'), tc = document.getElementById('tcap'), tg = document.getElementById('tgrid');
+  G.themes.forEach(function(t, i){
+    var li = document.createElement('li'); li.innerHTML = '<em>' + String(i+1).padStart(2,'0') + '</em>' + t.id; li.dataset.i = i; tl.appendChild(li);
+    var im = document.createElement('img'); im.src = 'images/themes/' + t.id + '.webp'; im.alt = t.label; im.loading = i < 2 ? 'eager' : 'lazy'; tf.appendChild(im);
+    var fg = document.createElement('figure'); fg.innerHTML = '<img loading="lazy" src="images/themes/' + t.id + '.webp" alt=""><b>' + t.id + '</b> ' + (t.label||''); tg.appendChild(fg);
+  });
+  var cur = -1;
+  function setTheme(i){
+    if (i === cur || !G.themes[i]) return; cur = i;
+    [].forEach.call(tl.children, function(li, k){ li.classList.toggle('on', k === i); });
+    [].forEach.call(tf.children, function(im, k){ im.classList.toggle('on', k === i); });
+    var t = G.themes[i], use = Array.isArray(t.use) ? t.use.join(' · ') : (t.use || ''); tc.innerHTML = '<b>' + t.label + '</b>' + use;
+  }
+  setTheme(0);
+  var ts = document.getElementById('tscroll');
+  function onTheme(){
+    var r = ts.getBoundingClientRect(), total = ts.offsetHeight - window.innerHeight * 0.7;
+    var p = Math.max(0, Math.min(0.999, (-r.top + 76) / Math.max(1, total)));
+    setTheme(Math.floor(p * G.themes.length));
+  }
+  window.addEventListener('scroll', onTheme, {passive:true});
+  tl.addEventListener('click', function(e){
+    var li = e.target.closest('li'); if (!li) return;
+    var i = +li.dataset.i, total = ts.offsetHeight - window.innerHeight * 0.7;
+    window.scrollTo({top: ts.getBoundingClientRect().top + window.scrollY - 76 + total * (i + 0.5) / G.themes.length, behavior: reduce ? 'auto' : 'smooth'});
+  });
+
+  // 예시 덱
+  var box = document.getElementById('decks'), chips = document.getElementById('chips');
+  var groups = [['all','전체'],['edu','교육·학교'],['biz','보고·비즈니스'],['show','발표·행사'],['culture','문화·마음']];
+  var gmap = {training:'edu', class_kids:'edu', parents:'edu', academic:'edu', public:'biz', data:'biz', strategy:'biz', pitch:'biz',
+              launch:'show', tech:'show', event:'show', ceremony:'show', campaign:'show', marketing:'culture', counseling:'culture', talk:'culture', exhibition:'culture', portfolio:'culture'};
+  groups.forEach(function(g, k){ var b = document.createElement('button'); b.className = 'chip' + (k ? '' : ' on'); b.textContent = g[1]; b.dataset.g = g[0]; chips.appendChild(b); });
+  chips.addEventListener('click', function(e){
+    var b = e.target.closest('.chip'); if (!b) return;
+    [].forEach.call(chips.children, function(c){ c.classList.toggle('on', c === b); });
+    [].forEach.call(box.children, function(d){ d.classList.toggle('hide', b.dataset.g !== 'all' && d.dataset.g !== b.dataset.g); });
+  });
+  G.decks.forEach(function(d){
+    var el = document.createElement('article'); el.className = 'deck'; el.dataset.g = gmap[d.id] || 'biz';
+    var imgs = ''; for (var i = 1; i <= d.n; i++) imgs += '<img loading="lazy" src="images/decks/' + d.id + '/' + String(i).padStart(2,'0') + '.webp" alt="' + d.title + ' ' + i + '" data-deck="' + d.id + '" data-i="' + i + '">';
+    el.innerHTML = '<header><h3>' + d.title + '</h3><span class="tag"><b>' + d.label + '</b> · 테마 ' + d.theme + ' · 움직임 ' + d.motion + ' · ' + d.slides + '장</span></header><div class="strip">' + imgs + '</div>';
+    box.appendChild(el);
+  });
+
+  // 크게 보기
+  var lb = document.getElementById('lb'), lbi = lb.querySelector('img'), lbc = lb.querySelector('.cnt'), cd = null, ci = 1;
+  function show(){ var d = G.decks.filter(function(x){ return x.id === cd; })[0]; lbi.src = 'images/decks/' + cd + '/' + String(ci).padStart(2,'0') + '.webp'; lbc.textContent = d.title + ' · ' + ci + ' / ' + d.n; }
+  box.addEventListener('click', function(e){ var im = e.target.closest('img[data-deck]'); if (!im) return; cd = im.dataset.deck; ci = +im.dataset.i; show(); lb.classList.add('on'); });
+  function step(k){ var d = G.decks.filter(function(x){ return x.id === cd; })[0]; ci = (ci - 1 + k + d.n) % d.n + 1; show(); }
+  lb.querySelector('.x').onclick = function(){ lb.classList.remove('on'); };
+  lb.querySelector('.p').onclick = function(e){ e.stopPropagation(); step(-1); };
+  lb.querySelector('.n').onclick = function(e){ e.stopPropagation(); step(1); };
+  lb.addEventListener('click', function(e){ if (e.target === lb) lb.classList.remove('on'); });
+  document.addEventListener('keydown', function(e){ if (!lb.classList.contains('on')) return; if (e.key === 'Escape') lb.classList.remove('on'); if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1); });
+
+  // 나타나기·숫자·영상
+  var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, {threshold: 0.12});
+  document.querySelectorAll('.reveal,.deck').forEach(function(el){ io.observe(el); });
+  var sc = document.getElementById('score');
+  new IntersectionObserver(function(es, o){ es.forEach(function(e){ if (e.isIntersecting){ sc.classList.add('in'); o.disconnect(); } }); }, {threshold: 0.4}).observe(sc);
+  var vid = document.getElementById('vid');
+  new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting) { vid.play().catch(function(){}); } else { vid.pause(); } }); }, {threshold: 0.3}).observe(vid);
+  document.querySelectorAll('.numbers b').forEach(function(b){
+    var n = +b.dataset.n; if (reduce || !n) return; b.textContent = '0';
+    new IntersectionObserver(function(es, o){ es.forEach(function(e){ if (!e.isIntersecting) return; o.disconnect(); var t0 = performance.now();
+      (function f(t){ var p = Math.min(1, (t - t0) / 900); b.textContent = String(Math.round(n * (1 - Math.pow(1 - p, 3)))); if (p < 1) requestAnimationFrame(f); })(t0); }); }, {threshold: 0.6}).observe(b);
+  });
+
+  // 복사 단추
+  document.querySelectorAll('.copy').forEach(function(btn){ btn.addEventListener('click', function(){
+    var t = btn.parentElement.innerText.replace(btn.innerText, '').replace(/^\s*#.*$/mg, '').trim();
+    navigator.clipboard.writeText(t).then(function(){ btn.textContent = '복사됨'; setTimeout(function(){ btn.textContent = '복사'; }, 1400); });
+  }); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+{
+ "name": "swiss",
+ "order": 11,
+ "label": "스위스 그리드",
+ "mode": "light",
+ "summary": "흰 바탕·검정·빨강 하나. 아주 굵은 큰 글자, 왼쪽 정렬, 12단 격자와 번호. 디자인·건축·포트폴리오·디자인 강의.",
+ "use_for": [
+  "포트폴리오",
+  "디자인 강의",
+  "건축·공간",
+  "크리에이티브 제안"
+ ],
+ "fonts": {
+  "body": "Pretendard",
+  "weights": {
+   "H": "BL",
+   "D": "BL",
+   "N": "BL"
+  }
+ },
+ "tracking": {
+  "H": -0.035,
+  "D": -0.05,
+  "N": -0.05
+ },
+ "neutrals": {
+  "page": "FFFFFF",
+  "panel": "F2F2F2",
+  "panel2": "E6E6E6",
+  "card": "FFFFFF",
+  "ink": "000000",
+  "body": "1A1A1A",
+  "muted": "6B6B6B",
+  "faint": "7A7A7A",
+  "rule": "E6E6E6",
+  "rule2": "000000",
+  "inv_bg": "000000",
+  "inv_ink": "FFFFFF",
+  "inv_muted": "9A9A9A"
+ },
+ "style": {
+  "radius": 0,
+  "panel": "rule",
+  "section": "number",
+  "cover": "grid",
+  "statement": "huge",
+  "header": "number",
+  "footer": "plain",
+  "numeral": "BL",
+  "title": "BL",
+  "title_size": 32,
+  "decor": "grid",
+  "bullet": "–",
+  "card": "top",
+  "closing": "type"
+ },
+ "data": {
+  "pre": "BFBFBF",
+  "post": "000000",
+  "ramp": [
+   "E6E6E6",
+   "BFBFBF",
+   "8C8C8C",
+   "4D4D4D",
+   "000000"
+  ],
+  "grid": "E6E6E6",
+  "axis": "000000",
+  "series": [
+   "000000",
+   "E30613",
+   "8C8C8C",
+   "BFBFBF",
+   "4D4D4D"
+  ]
+ },
+ "default_accent": "red",
+ "section_accents": [
+  "red"
+ ],
+ "motion": "dynamic"
+}

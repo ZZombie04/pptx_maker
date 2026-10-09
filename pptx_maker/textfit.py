@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import copy
 
-from .fonts import LINE, char_width, first_line_cut
+from .fonts import LINE, char_width, first_line_cut, first_line_delta, is_ea
 
 CLOSERS = set(")]}>,.!?:;%·…”’」』〉》、。」」·’”…")
 OPENERS = set("([{<“‘「『〈《“‘")
@@ -32,16 +32,18 @@ def run_font(r):
 
 
 def flatten(p):
-    """문단 → [(글자, 런 번호, 폭)]"""
+    """문단 → [(글자, 런 번호, 폭)] — 폭에는 자간(trk × 크기)까지 넣는다."""
     out = []
     for i, r in enumerate(p["runs"]):
         font, bold = run_font(r)
         size = float(r["size"])
+        ea = r.get("ea")
+        sp = float(r.get("trk") or 0.0) * size
         for ch in r["t"]:
             if ch == "\n":
                 out.append((ch, i, 0.0))
             else:
-                out.append((ch, i, char_width(ch, font, bold, size)))
+                out.append((ch, i, char_width(ch, font, bold, size, ea=ea) + sp))
     return out
 
 
@@ -151,11 +153,27 @@ def para_max_size(p):
     return max(sizes)
 
 
+def para_font(p):
+    """문단에서 가장 큰 글자의 (글꼴, 굵게) — 첫 줄 높이를 정한다."""
+    best = None
+    for r in p["runs"]:
+        if r.get("t") and (best is None or float(r["size"]) > float(best["size"])):
+            best = r
+    best = best or (p["runs"][0] if p["runs"] else {"font": "Pretendard"})
+    has_ea = any(is_ea(ord(c)) for r in p["runs"] for c in r.get("t", ""))
+    return (best.get("ea") if (best.get("ea") and has_ea) else best.get("font") or "Pretendard"), bool(best.get("bold"))
+
+
 def para_height(p, nlines):
     S = para_max_size(p)
     lh = float(p.get("lh") or 1.0)
+    if p.get("lh_pts"):                      # 고정 줄 간격(pt) — PowerPoint 실측: 같은 배수의 % 간격과 높이가 같다
+        lh = float(p["lh_pts"]) / (LINE * S)
     pitch = LINE * S * lh
     first = S * (LINE * lh - first_line_cut(lh))
+    if lh > 1.0:
+        font, bold = para_font(p)
+        first += S * first_line_delta(font, bold) * min(1.0, (lh - 1.0) / 0.25)
     return float(p.get("sb") or 0) + first + max(0, nlines - 1) * pitch + float(p.get("sa") or 0)
 
 

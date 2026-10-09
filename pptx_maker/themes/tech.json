@@ -1,0 +1,89 @@
+{
+ "name": "tech",
+ "order": 12,
+ "label": "테크(개발)",
+ "mode": "dark",
+ "summary": "어두운 먹색 바탕에 라임 하나, 고정폭 머리말 '// 01'과 점 격자, 코드 블록·터미널. 개발자 컨퍼런스·AI·IT 교육·기술 세미나.",
+ "use_for": [
+  "개발자 컨퍼런스",
+  "AI·IT 교육",
+  "기술 세미나",
+  "해커톤"
+ ],
+ "fonts": {
+  "body": "Pretendard",
+  "code": "D2Coding",
+  "latin": {
+   "num": "JetBrains Mono"
+  },
+  "weights": {
+   "H": "B",
+   "D": "EB",
+   "N": "R"
+  }
+ },
+ "tracking": {
+  "H": -0.02,
+  "D": -0.03,
+  "N": -0.02
+ },
+ "neutrals": {
+  "page": "101214",
+  "panel": "181B1F",
+  "panel2": "23272D",
+  "card": "1A1D22",
+  "ink": "F1F2F4",
+  "body": "C9CDD3",
+  "muted": "8A919B",
+  "faint": "7A828C",
+  "rule": "262A30",
+  "rule2": "343A42",
+  "inv_bg": "F1F2F4",
+  "inv_ink": "101214",
+  "inv_muted": "5B636E"
+ },
+ "style": {
+  "radius": 8,
+  "panel": "fill",
+  "section": "dark",
+  "cover": "terminal",
+  "statement": "field",
+  "header": "mono",
+  "footer": "mono",
+  "numeral": "R",
+  "title": "B",
+  "title_size": 30,
+  "decor": "dots",
+  "bullet": "›",
+  "card": "fill",
+  "closing": "terminal"
+ },
+ "data": {
+  "pre": "3A4A2A",
+  "post": "C6F432",
+  "ramp": [
+   "2E3A1F",
+   "4E6A1C",
+   "7FA81F",
+   "A9D62A",
+   "C6F432"
+  ],
+  "grid": "262A30",
+  "axis": "343A42",
+  "series": [
+   "C6F432",
+   "5CC8FF",
+   "FF9F43",
+   "FF6B81",
+   "8A919B"
+  ]
+ },
+ "default_accent": "lime",
+ "section_accents": [
+  "lime",
+  "cyan",
+  "mint",
+  "orange"
+ ],
+ "motion": "dynamic"
+}

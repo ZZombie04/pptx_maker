@@ -97,20 +97,20 @@ def prepare(src, w, h, focus=(0.5, 0.5), region=None, cache_dir=None, max_px=180
         st = os.stat(src)
         tag = hashlib.md5(f"{src}|{st.st_mtime}|{st.st_size}|{ratio:.4f}|{focus}|{region}|{max_px}".encode()).hexdigest()[:10]
         base = os.path.splitext(os.path.basename(src))[0][:40]
-        im = _PIL.open(src)
-        has_alpha = im.mode in ("RGBA", "LA") or (im.mode == "P" and "transparency" in im.info)
-        out = os.path.join(cache_dir, f"{base}_{tag}.{'png' if has_alpha else 'jpg'}")
-        if not os.path.exists(out):
-            im = im.convert("RGBA" if has_alpha else "RGB")
-            box = crop_box(im.width, im.height, ratio, focus, region)
-            im = im.crop(box)
-            tgt = min(max_px, max(600, int(w * dpi_scale)))
-            if im.width > tgt:
-                im = im.resize((tgt, max(1, int(tgt / ratio))), _PIL.LANCZOS)
-            if has_alpha:
-                im.save(out, optimize=True)
-            else:
-                im.save(out, quality=86, optimize=True)
+        with _PIL.open(src) as src_im:
+            has_alpha = src_im.mode in ("RGBA", "LA") or (src_im.mode == "P" and "transparency" in src_im.info)
+            out = os.path.join(cache_dir, f"{base}_{tag}.{'png' if has_alpha else 'jpg'}")
+            if not os.path.exists(out):
+                im = src_im.convert("RGBA" if has_alpha else "RGB")
+                box = crop_box(im.width, im.height, ratio, focus, region)
+                im = im.crop(box)
+                tgt = min(max_px, max(600, int(w * dpi_scale)))
+                if im.width > tgt:
+                    im = im.resize((tgt, max(1, int(tgt / ratio))), _PIL.LANCZOS)
+                if has_alpha:
+                    im.save(out, optimize=True)
+                else:
+                    im.save(out, quality=86, optimize=True)
         return {"path": out, "crop": None}
     iw, ih = size(src)
     x0, y0, x1, y1 = crop_box(iw, ih, ratio, focus, region)
